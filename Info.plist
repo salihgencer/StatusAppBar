@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key>
+    <string>StatusAppBar</string>
+    <key>CFBundleDisplayName</key>
+    <string>StatusAppBar</string>
+    <key>CFBundleIdentifier</key>
+    <string>io.github.salihgencer.statusappbar</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleExecutable</key>
+    <string>StatusAppBar</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>14.0</string>
+    <!-- LSUIElement: Dock'ta ikon gösterme, sadece menu bar uygulaması olarak çalış -->
+    <key>LSUIElement</key>
+    <true/>
+    <key>NSHumanReadableCopyright</key>
+    <string>StatusAppBar</string>
+</dict>
+</plist>
