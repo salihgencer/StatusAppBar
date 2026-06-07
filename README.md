@@ -44,6 +44,7 @@ The menu bar shows whichever metrics you choose, and it **turns red as the syste
   - **Power** — battery level, adapter wattage, charge state, cycle count, health, temperature
   - **Network** — live down/up throughput + local IP
 - **Overall health score** (0–100) with tunable weights.
+- **Launch at login** — one toggle in Settings (uses the modern `SMAppService` API).
 - **No Dock icon**, no window clutter — pure menu bar app.
 
 ## Requirements
@@ -53,7 +54,19 @@ The menu bar shows whichever metrics you choose, and it **turns red as the syste
 
 ## Install
 
-StatusAppBar is distributed as source. Build it in a few seconds:
+### Download (prebuilt)
+
+1. Download `StatusAppBar.zip` from the [**Releases**](https://github.com/salihgencer/StatusAppBar/releases) page and unzip it.
+2. Move `StatusAppBar.app` to `/Applications`.
+3. The app is **ad-hoc signed, not notarized** (no paid Apple Developer account), so Gatekeeper blocks it on first launch. Allow it once:
+
+   ```bash
+   xattr -dr com.apple.quarantine /Applications/StatusAppBar.app
+   ```
+
+   …then open it normally. (Alternatively: right-click the app → **Open** → **Open**.)
+
+### Build from source
 
 ```bash
 git clone https://github.com/salihgencer/StatusAppBar.git
@@ -68,11 +81,10 @@ Or run it directly during development (no bundle, no Dock icon):
 swift run
 ```
 
-> **Gatekeeper note:** the build is ad-hoc signed for local use. The first time you open it, you may need to right-click the app → **Open**, or allow it under **System Settings → Privacy & Security**.
-
 ### Launch at login
 
-**System Settings → General → Login Items → +** and add `StatusAppBar.app`.
+Open the panel → **Settings** → enable **Açılışta başlat** (*Launch at login*).
+You can also add it manually via **System Settings → General → Login Items**.
 
 ## Usage
 

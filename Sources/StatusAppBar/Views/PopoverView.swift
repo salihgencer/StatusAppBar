@@ -271,6 +271,10 @@ private struct SettingsSection: View {
                 .toggleStyle(.checkbox)
                 .font(.system(size: 11))
 
+            Toggle("Açılışta başlat", isOn: $settings.launchAtLogin)
+                .toggleStyle(.checkbox)
+                .font(.system(size: 11))
+
             HStack(spacing: 6) {
                 Text("Yenileme")
                     .font(.system(size: 11))
