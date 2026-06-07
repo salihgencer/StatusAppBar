@@ -76,8 +76,8 @@ enum SnapshotRenderer {
             to: dir + "/popover.png"
         )
 
-        // Menu bar etiketi — normal (nötr)
-        writePNG(barStrip(MetricsManager.mock(cpuTotal: 0.34), settings),
+        // Menu bar etiketi — normal/rahat (nötr)
+        writePNG(barStrip(MetricsManager.mock(cpuTotal: 0.20), settings),
                  to: dir + "/menubar.png")
 
         // Menu bar etiketi — yük altında (kırmızı)

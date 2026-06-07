@@ -57,8 +57,10 @@ struct MenuBarLabel: View {
     // MARK: - Stres -> renk
 
     /// 0 (rahat) ... 1 (tam yük). Esas sürücü CPU; RAM yalnızca çok yüksekken katkı verir.
+    /// CPU eşiği günlük kullanımda görünür olsun diye düşük tutulur: ortalama CPU
+    /// ~%25'te renklenmeye başlar, ~%75'te tam kırmızı.
     private func stressLevel() -> Double {
-        let cpuStress = ramp(metrics.cpu.total, from: 0.50, to: 0.90)
+        let cpuStress = ramp(metrics.cpu.total, from: 0.25, to: 0.75)
         let ramStress = ramp(metrics.memory.usedFraction, from: 0.85, to: 0.98)
         return max(cpuStress, ramStress)
     }
