@@ -24,6 +24,7 @@ enum MachineInfoProvider {
         guard size > 0 else { return "—" }
         var bytes = [CChar](repeating: 0, count: size)
         sysctlbyname("machdep.cpu.brand_string", &bytes, &size, nil, 0)
-        return String(cString: bytes)
+        return String(decoding: bytes.prefix { $0 != 0 }.map { UInt8(bitPattern: $0) },
+                      as: UTF8.self)
     }
 }

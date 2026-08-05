@@ -1,0 +1,42 @@
+# XcodeGen proje tanımı — Mac App Store (MAS) build'i için.
+# .xcodeproj git'e GİRMEZ; her koşuda `xcodegen generate` ile taze üretilir
+# (kahve-fali konvansiyonu). Ücretsiz GitHub sürümü hâlâ SwiftPM ile derlenir
+# (build.sh / swift run) — bu proje yalnızca MAS kanalı içindir.
+name: StatusAppBar
+options:
+  bundleIdPrefix: com.salihgencer
+  createIntermediateGroups: true
+  # Kaynak dil Türkçe: koddaki literal'ler katalog anahtarıdır; İngilizce
+  # çeviriler Resources/Localizable.xcstrings içinde yaşar.
+  developmentLanguage: tr
+targets:
+  StatusAppBar:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: Sources/StatusAppBar
+      - path: Resources
+      - path: PrivacyInfo.xcprivacy
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.salihgencer.statusappbar
+        PRODUCT_NAME: StatusAppBar
+        # Mevcut Info.plist kullanılır; XcodeGen/Xcode yenisini üretmesin.
+        INFOPLIST_FILE: Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGN_ENTITLEMENTS: StatusAppBar.entitlements
+        CODE_SIGN_STYLE: Automatic
+        # Kerim Öz'ün ücretli takımı (kahve-fali ile aynı).
+        DEVELOPMENT_TEAM: A6R928V6HS
+        # MAS bayrağı: Gemini derin analiz + sandbox uyumlu yollar bu koşulla
+        # derlenir (bkz. Sources/StatusAppBar/BuildVariant.swift).
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) MAS"
+        # Package.swift'teki Swift 6.2 dil modu ile aynı ayarlar:
+        # her şey MainActor, arka plan yalnızca Sampler aktörü.
+        SWIFT_VERSION: "6.2"
+        OTHER_SWIFT_FLAGS: "-default-isolation MainActor -enable-upcoming-feature NonisolatedNonsendingByDefault"
+        # Hardened Runtime MAS için gerekli değil (notarization konusu);
+        # sandbox zaten entitlements'ta.
+        ENABLE_HARDENED_RUNTIME: NO

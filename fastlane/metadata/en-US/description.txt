@@ -1,0 +1,28 @@
+StatusAppBar is a lightweight, fully local system monitor that keeps your Mac's pulse in the menu bar. No terminal, no Dock icon, no background bloat.
+
+LIVE INDICATOR
+CPU, memory, disk and network usage — the metrics you choose, always visible. The readout turns red as the system comes under load, so you spot pressure at a glance. The smart "Adaptive" width mode solves menu bar crowding on notched MacBooks: a single dot when calm, the most-pressured metric under stress.
+
+SMART ALERTS
+Get notified about the conditions that actually make a Mac hot, slow and short on battery — with the responsible app named:
+• Memory pressure (swap filling up)
+• CPU hog (one app saturating cores)
+• Thermal throttling
+• Long uptime reminder
+• Abnormal battery drain
+Hysteresis, dwell and cooldown mechanisms keep false positives away, and you get a "back to normal" notification when a condition clears.
+
+DEEP ANALYSIS (Gemini)
+Send a system snapshot to Gemini with one click, get a prioritized diagnosis, and ask follow-up questions in a chat window. Uses your own Gemini API key; runs only when you press the button — no background requests.
+
+DETAILED PANEL
+• CPU: total + per-core, load average, P/E core split
+• Memory: usage, swap, compressed, swap traffic
+• Disk: per-volume usage + live read/write throughput
+• Power: battery level, health, cycle count, instant wattage
+• Network: live down/up throughput
+
+PRIVACY
+No data is collected; no analytics, no accounts, no ads. Deep analysis is optional and sends a system summary to Google Gemini only when you explicitly start it.
+
+Note: due to App Store security rules (sandboxing), the process list shows only apps running under your own user account.

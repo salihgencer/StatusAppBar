@@ -6,6 +6,7 @@ import Foundation
 /// metriklerin baskısını ağırlıklandırarak tek bir sezgisel sayıya indirir:
 ///  - Yüksek CPU / RAM / disk doluluğu skoru DÜŞÜRÜR (sistem zorlanıyor).
 ///  - Yüksek batarya sıcaklığı skoru düşürür.
+///  - Termal baskı (`thermalState`) skoru düşürür — sistem zaten kısılıyor.
 ///  - Her metriğin "ağırlığı" ne kadar önemli olduğunu belirler.
 ///
 /// Trade-off'lar:
@@ -13,13 +14,16 @@ import Foundation
 ///    verirsen skor anlık yüke daha duyarlı (ama daha "zıplayan") olur.
 ///  - Lineer ceza basit ama eşik mantığı yok; "0.85 üstü kritik" gibi
 ///    keskin eşikler istersen non-lineer ceza ekleyebilirsin.
-enum HealthScore {
+///  - Termal baskıya en büyük tekil ağırlık verildi: doluluk sinyalleri
+///    tahmin, `thermalState` ise sistemin kendisi hakkında verdiği hüküm.
+nonisolated enum HealthScore {
 
     static func compute(
         cpu: CPUMetrics,
         memory: MemoryMetrics,
         disk: DiskMetrics,
-        power: PowerMetrics
+        power: PowerMetrics,
+        thermal: ThermalMetrics
     ) -> Int {
         // En dolu disk volume'unun oranı (kök disk genelde en kritik olan).
         let diskPressure = disk.volumes.map(\.fraction).max() ?? 0
@@ -27,12 +31,16 @@ enum HealthScore {
         // Sıcaklık baskısı: ~45°C ve üstü tam ceza olacak şekilde 0...1'e ölçekle.
         let tempPressure = power.hasBattery ? min(1.0, max(0.0, (power.temperature - 30) / 15)) : 0
 
+        // Termal baskı: fair 1/3, serious 2/3, critical tam ceza.
+        let thermalPressure = min(1.0, Double(thermal.severity) / 3.0)
+
         // Ağırlıklı baskı toplamı. Ağırlıklar 1.0'a tamamlanır.
         let pressure =
-            cpu.total       * 0.35 +
-            memory.usedFraction * 0.30 +
-            diskPressure    * 0.20 +
-            tempPressure    * 0.15
+            cpu.total           * 0.30 +
+            memory.usedFraction * 0.25 +
+            diskPressure        * 0.15 +
+            tempPressure        * 0.10 +
+            thermalPressure     * 0.20
 
         // Baskı ne kadar yüksekse skor o kadar düşük.
         let score = (1.0 - pressure) * 100

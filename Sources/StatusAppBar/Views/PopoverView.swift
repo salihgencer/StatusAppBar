@@ -1,8 +1,59 @@
 import SwiftUI
 
 /// Menu bar etiketine tıklayınca açılan ana panel. Görseldeki tüm bölümleri
-/// (CPU, Memory, Disk, Power, Network) native kartlar halinde gösterir.
+/// (CPU, Memory, Disk, Power, Network, Thermal) native kartlar halinde gösterir.
 struct PopoverView: View {
+
+    /// Panelin ekranı taşmaması için üst sınır. Uyarılar ve derin analiz
+    /// sonucu içeriği epey uzatabiliyor.
+    private static let maxHeight: CGFloat = 700
+
+    /// Ölçüm gelmeden önceki başlangıç yüksekliği. Sıfırdan başlamak paneli
+    /// bir kare boyunca şerit gibi gösterirdi.
+    @State private var contentHeight: CGFloat = 460
+
+    var body: some View {
+        ScrollView {
+            PopoverContent()
+                .background(
+                    // İçeriğin gerçek yüksekliğini ölçüp yukarı taşır.
+                    GeometryReader { geo in
+                        Color.clear.preference(
+                            key: ContentHeightKey.self,
+                            value: geo.size.height
+                        )
+                    }
+                )
+        }
+        // NEDEN AÇIK YÜKSEKLİK: `MenuBarExtra(.window)` pencereyi içeriğin
+        // ideal boyutuna göre açar. `ScrollView`'ın İÇSEL YÜKSEKLİĞİ YOKTUR —
+        // ölçüsüz bırakılırsa pencere sıfır yüksekliğe çöker ve panel menu
+        // bar'ın altında ince bir şerit olarak görünür. Bu yüzden içeriği
+        // ölçüp sınırlıyoruz: kısa içerikte pencere tam oturur, uzun içerikte
+        // 700'de durup kaydırılır.
+        .frame(width: 460, height: min(contentHeight, Self.maxHeight))
+        .onPreferenceChange(ContentHeightKey.self) { height in
+            guard height > 0 else { return }
+            contentHeight = height
+        }
+    }
+}
+
+/// `PopoverContent`'in ölçülen yüksekliğini `PopoverView`'a taşır.
+private struct ContentHeightKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}
+
+/// Panelin asıl gövdesi, `ScrollView`'dan ayrı.
+///
+/// AYRIM NEDEN VAR: `ImageRenderer` bir `ScrollView`'ı BOŞ render eder —
+/// kaydırma görünümünün içsel bir yüksekliği yoktur, `fixedSize()` altında
+/// sıfır ölçülür. README görsellerini üreten `--make-docs` bu yüzden doğrudan
+/// `PopoverContent`'i render eder.
+struct PopoverContent: View {
     @EnvironmentObject var metrics: MetricsManager
     @EnvironmentObject var settings: AppSettings
     @State private var showSettings = false
@@ -10,6 +61,10 @@ struct PopoverView: View {
     var body: some View {
         VStack(spacing: 8) {
             HeaderSection()
+
+            // Uyarı varsa en üstte — panel açıldığında ilk görülen şey
+            // "her şey yolunda mı" sorusunun cevabı olmalı.
+            AlertsSection()
 
             CPUSection()
 
@@ -23,12 +78,24 @@ struct PopoverView: View {
                 NetworkSection()
             }
 
+            // Isınma nedeni uyarı beklenmeden sürekli görünür — kullanıcı
+            // "neden ısınıyor" sorusunun cevabını burada görür.
+            ThermalSection()
+
+            TopProcessesSection()
+
+            #if MAS
+            // Derin analiz yalnızca ücretli App Store sürümünde (BuildVariant).
+            DeepAnalysisSection()
+            #endif
+
             Divider().padding(.vertical, 2)
 
             FooterBar(showSettings: $showSettings)
 
             if showSettings {
                 SettingsSection()
+                AlertSettingsSection()
             }
         }
         .padding(12)
@@ -131,6 +198,16 @@ private struct MemorySection: View {
                       fraction: mem.swapFraction, color: nil)
             InfoRow(label: "Total", value: "\(Fmt.bytes(mem.used)) / \(Fmt.bytes(mem.total))")
             InfoRow(label: "Free", value: Fmt.bytes(mem.free))
+            InfoRow(label: String(localized: "Sıkışık"), value: Fmt.bytes(mem.compressed))
+            // Swap trafiği yalnızca gerçekten akış varken gösterilir; sıfır
+            // satırı her zaman durmak paneli gereksiz doldurur.
+            if mem.swapInsPerSec + mem.swapOutsPerSec > 0 {
+                InfoRow(
+                    label: String(localized: "Takas"),
+                    value: "↓\(Fmt.rate(mem.swapInsPerSec)) ↑\(Fmt.rate(mem.swapOutsPerSec))",
+                    valueColor: mem.isThrashing ? Theme.cpu : .primary
+                )
+            }
         }
     }
 }
@@ -174,6 +251,19 @@ private struct PowerSection: View {
                 MetricRow(label: "Level", value: Fmt.percent(p.level, decimals: 0),
                           fraction: p.level, color: Theme.power)
                 InfoRow(label: "Input", value: p.adapterWatts > 0 ? "\(p.adapterWatts)W max" : "—")
+                // Anlık güç: "pil hızlı bitiyor" hissini doğrulayan tek sayı.
+                // Boştaki bir MacBook 3-8 W çeker; 20 W üstü arka planda ağır
+                // bir iş var demektir.
+                if p.voltageMV > 0 {
+                    InfoRow(
+                        label: String(localized: "Çekiş"),
+                        value: String(format: "%.1f W · %@", p.watts,
+                                      p.amperageMA >= 0
+                                        ? String(localized: "şarj")
+                                        : String(localized: "deşarj")),
+                        valueColor: (p.isDischarging && p.watts >= 20) ? Theme.cpu : .primary
+                    )
+                }
                 InfoRow(label: "Status", value: statusText(p))
                 InfoRow(
                     label: "Battery",
@@ -215,6 +305,45 @@ private struct NetworkSection: View {
             MetricRow(label: "Up", value: Fmt.rate(net.upPerSec),
                       fraction: min(1, net.upPerSec / cap), color: Theme.network)
             InfoRow(label: "IP", value: net.ipAddress ?? "—")
+        }
+    }
+}
+
+// MARK: - Thermal
+
+/// Termal durum + ısınmanın olası nedeni. Karar cümlesi `ThermalAttribution`
+/// motorundan gelir; nominal durumdayken neden aranmaz, "baskı yok" denir.
+private struct ThermalSection: View {
+    @EnvironmentObject var metrics: MetricsManager
+
+    var body: some View {
+        let t = metrics.thermal
+        let a = metrics.thermalAttribution
+        SectionCard(icon: "thermometer.high", title: "Thermal", accent: accent(for: t.severity)) {
+            InfoRow(label: String(localized: "Durum"), value: t.label,
+                    valueColor: accent(for: t.severity))
+            InfoRow(
+                label: String(localized: "Neden"),
+                value: a.message.isEmpty ? String(localized: "Termal baskı yok") : a.message,
+                valueColor: a.cause == .none ? .secondary : .primary
+            )
+            // kernel_task kısarak soğutuyor: neden değil sonuç, ayrı rozet.
+            if a.coolingActive {
+                InfoRow(
+                    label: String(localized: "Soğutma"),
+                    value: String(format: String(localized: "Aktif (kernel_task %%%.0f)"),
+                                  metrics.processes.kernelTaskCPU),
+                    valueColor: Theme.disk
+                )
+            }
+        }
+    }
+
+    private func accent(for severity: Int) -> Color {
+        switch severity {
+        case 0:  return Theme.power
+        case 1:  return Theme.disk
+        default: return Theme.cpu
         }
     }
 }
@@ -270,6 +399,21 @@ private struct SettingsSection: View {
             Toggle("İkonları göster", isOn: $settings.showIcons)
                 .toggleStyle(.checkbox)
                 .font(.system(size: 11))
+
+            // Çentikli MacBook'ta menu bar dolunca geniş etiket görünmez oluyor.
+            // "Otomatik" sakinken tek nokta gösterip yer sorununu ortadan kaldırır.
+            HStack(spacing: 6) {
+                Text("Genişlik")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                Picker("", selection: $settings.menuBarMode) {
+                    ForEach(MenuBarMode.allCases) { mode in
+                        Text(mode.label).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .frame(width: 240)
+            }
 
             Toggle("Açılışta başlat", isOn: $settings.launchAtLogin)
                 .toggleStyle(.checkbox)

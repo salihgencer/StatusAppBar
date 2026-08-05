@@ -5,7 +5,7 @@ import Foundation
 /// Çekirdek tick sayaçları kümülatiftir; kullanım yüzdesi ancak iki ölçüm
 /// arasındaki FARK'tan hesaplanır. Bu yüzden önceki örneği saklıyoruz ve
 /// ilk tick'te (önceki yokken) 0 döndürüyoruz.
-final class CPUMonitor {
+nonisolated final class CPUMonitor {
 
     private struct CoreTicks {
         var user: UInt32

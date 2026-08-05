@@ -1,0 +1,1 @@
+cpu,memory,disk,network,battery,menu bar,monitor,alerts,usage,stats

@@ -1,0 +1,8 @@
+# macOS (Mac App Store) fastlane yapılandırması (repo kökünden: `fastlane mac <lane>`)
+app_identifier("com.salihgencer.statusappbar")
+# Yayın Kerim Öz'ün ücretli Apple Developer takımından (A6R928V6HS) yapılır
+# (kahve-fali ile aynı takım).
+team_id(ENV["APPLE_TEAM_ID"] || "A6R928V6HS")
+# App Store Connect API anahtarı ortam değişkenleriyle verilir (git'e girmez):
+#   ASC_KEY_ID / ASC_ISSUER_ID  (~/.appstoreconnect/config içinde tanımlı)
+#   .p8 dosyası: ~/.appstoreconnect/private_keys/AuthKey_$ASC_KEY_ID.p8

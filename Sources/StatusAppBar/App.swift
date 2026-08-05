@@ -6,8 +6,10 @@ import SwiftUI
 @main
 struct StatusAppBarApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    // AppSettings.shared: uyarı motoru arka planda eşiklere erişiyor; iki ayrı
+    // örnek olsaydı arayüzden değiştirilen eşik motora ulaşmazdı.
+    @StateObject private var settings = AppSettings.shared
     @StateObject private var metrics = MetricsManager()
-    @StateObject private var settings = AppSettings()
 
     var body: some Scene {
         MenuBarExtra {
@@ -18,7 +20,25 @@ struct StatusAppBarApp: App {
             MenuBarLabel(metrics: metrics, settings: settings)
         }
         .menuBarExtraStyle(.window) // tıklayınca özel SwiftUI penceresi açılsın
+
+        #if MAS
+        // Derin analiz sohbeti ayrı bir pencerede yaşar: menu bar paneli odak
+        // kaybedince kapanıyor, sohbet oraya sığmaz (bkz. DeepAnalysisWindow).
+        // Yalnızca ücretli MAS sürümü (BuildVariant). `metrics` burada da
+        // gerekli: araçlar ve "güncel durum" butonu taze ölçümü ondan alır.
+        Window("Derin analiz", id: Self.deepAnalysisWindowID) {
+            DeepAnalysisWindow()
+                .environmentObject(metrics)
+                .environmentObject(settings)
+        }
+        .defaultSize(width: 620, height: 560)
+        .windowResizability(.contentMinSize)
+        #endif
     }
+
+    #if MAS
+    static let deepAnalysisWindowID = "deep-analysis"
+    #endif
 }
 
 /// Bundle'sız (swift run) çalıştırıldığında bile Dock ikonu çıkmasın diye
@@ -26,6 +46,12 @@ struct StatusAppBarApp: App {
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
+
+        // Bildirim izni BURADA istenir. Daha erken (örn. MetricsManager
+        // kurulumunda) çağrıldığında istek sessizce düşüyor: uygulama henüz
+        // Launch Services'e kaydolmadığı için Notification Center'a hiç
+        // ulaşmıyor ve uygulama bildirim ayarlarında bile görünmüyor.
+        Notifier.shared.requestAuthorization()
 
         // Dökümantasyon görseli üretme modu:
         //   StatusAppBar --make-docs <dizin>
@@ -55,22 +81,25 @@ enum SnapshotRenderer {
         // bozmamak için önce mevcut değerleri saklayıp sonra geri yükle.
         let settings = AppSettings()
         let saved = (settings.showCPU, settings.showRAM, settings.showDisk,
-                     settings.showNetwork, settings.showIcons)
+                     settings.showNetwork, settings.showIcons, settings.menuBarMode)
         settings.showCPU = true
         settings.showRAM = true
         settings.showDisk = true
         settings.showNetwork = true
         settings.showIcons = true
+        // README tablosu tüm metrikleri gösteren etiketi anlatıyor; varsayılan
+        // .adaptive burada sadece bir nokta çizerdi.
+        settings.menuBarMode = .full
 
-        // Popover (mock)
+        // Popover (mock). `PopoverView` DEĞİL `PopoverContent` render edilir —
+        // ImageRenderer bir ScrollView'ı boş çizer (içsel yüksekliği yok).
         writePNG(
             ZStack {
                 Color(nsColor: .windowBackgroundColor)
-                PopoverView()
+                PopoverContent()
                     .environmentObject(MetricsManager.mock(cpuTotal: 0.34))
                     .environmentObject(settings)
             }
-            .frame(width: 460)
             .fixedSize()
             .environment(\.colorScheme, .dark),
             to: dir + "/popover.png"
@@ -86,7 +115,7 @@ enum SnapshotRenderer {
 
         // Kullanıcı ayarlarını geri yükle.
         (settings.showCPU, settings.showRAM, settings.showDisk,
-         settings.showNetwork, settings.showIcons) = saved
+         settings.showNetwork, settings.showIcons, settings.menuBarMode) = saved
     }
 
     @MainActor

@@ -1,0 +1,28 @@
+StatusAppBar, Mac'inizin nabzını menü çubuğunda tutan hafif ve tamamen yerel bir sistem monitörüdür. Terminal yok, Dock simgesi yok, arka plan şişkinliği yok.
+
+CANLI GÖSTERGE
+CPU, bellek, disk ve ağ kullanımı — seçtikleriniz her zaman menü çubuğunda. Sistem yük altına girdiğinde gösterge kırmızıya döner; sorunu bir bakışta fark edersiniz. Çentikli MacBook'larda menü çubuğu taşmasını çözen akıllı "Otomatik" genişlik modu: sakinken tek bir nokta, stres altında en kritik metrik.
+
+AKILLI UYARILAR
+Makinenizi yavaşlatan, ısıtan ve pili bitiren durumları — sorumlu uygulamanın adıyla birlikte — bildirir:
+• Bellek baskısı (swap doluluğu)
+• CPU canavarı (tek uygulama çekirdekleri doldurduğunda)
+• Termal kısıtlanma
+• Uzun uptime hatırlatması
+• Anormal pil tüketimi
+Yanlış alarm üretmemesi için histerezis, bekleme süresi ve soğuma mekanizmaları; durum düzelince "normale döndü" bildirimi.
+
+DERİN ANALİZ (Gemini)
+Tek tıkla sistem anlık görüntüsünü Gemini'ye gönderin, önceliklendirilmiş Türkçe teşhis alın ve sohbet penceresinde takip soruları sorun. Kendi Gemini API anahtarınızı kullanırsınız; yalnızca siz başlattığınızda çalışır, arka planda istek yok.
+
+AYRINTILI PANEL
+• CPU: toplam + çekirdek başına, load average, P/E çekirdek ayrımı
+• Bellek: kullanım, swap, sıkıştırılmış, takas trafiği
+• Disk: birim başına doluluk + anlık okuma/yazma hızı
+• Güç: pil seviyesi, sağlık, döngü sayısı, anlık watt çekişi
+• Ağ: anlık indirme/yükleme hızı
+
+GİZLİLİK
+Hiçbir veri toplanmaz; analitik yok, hesap yok, reklam yok. Derin analiz isteğe bağlıdır ve sistem özeti yalnızca siz butona bastığınızda Google Gemini'ye gönderilir.
+
+Not: App Store güvenlik kuralları (sandbox) gereği işlem listesi yalnızca kendi kullanıcı hesabınızdaki uygulamaları gösterir.

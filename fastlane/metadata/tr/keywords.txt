@@ -1,0 +1,1 @@
+cpu,ram,bellek,disk,ağ,pil,menü,monitör,uyarı,sıcaklık,hız,batarya

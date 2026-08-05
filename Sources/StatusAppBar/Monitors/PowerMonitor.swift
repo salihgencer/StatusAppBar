@@ -5,7 +5,7 @@ import IOKit.ps
 /// Güç / batarya bilgisi iki kaynaktan birleştirilir:
 ///  1) IOPowerSources API  -> şarj seviyesi, şarj durumu, kalan süre
 ///  2) AppleSmartBattery registry -> döngü sayısı, sıcaklık, sağlık %, adaptör watt
-final class PowerMonitor {
+nonisolated final class PowerMonitor {
 
     func sample() -> PowerMetrics {
         var metrics = PowerMetrics()
@@ -78,6 +78,18 @@ final class PowerMonitor {
         if let adapter = dict["AdapterDetails"] as? [String: Any],
            let watts = adapter["Watts"] as? Int {
             metrics.adapterWatts = watts
+        }
+
+        // Anlık akım/voltaj -> gerçek güç çekişi.
+        // InstantAmperage anlık, Amperage ortalanmış değerdir; anlık olan
+        // "şu an ne oluyor" sorusuna daha iyi cevap verir.
+        // DİKKAT: registry bu değeri işaretsiz 64-bit olarak verebiliyor;
+        // 2^63 üstü değerler aslında negatif (deşarj) demektir.
+        if let raw = (dict["InstantAmperage"] as? Int) ?? (dict["Amperage"] as? Int) {
+            metrics.amperageMA = raw
+        }
+        if let volt = dict["Voltage"] as? Int {
+            metrics.voltageMV = volt
         }
     }
 }

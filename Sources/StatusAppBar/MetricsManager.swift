@@ -1,12 +1,16 @@
 import Combine
 import Foundation
 
-/// Tüm monitor'leri sahiplenir, belirli aralıkla örnekler ve sonuçları
-/// `@Published` olarak yayınlar. SwiftUI view'lar bu nesneyi izler.
+/// Örneklemeyi sürer ve sonuçları `@Published` olarak yayınlar. SwiftUI
+/// view'lar bu nesneyi izler.
 ///
-/// Sampling, UI'yi bloklamamak için arka plan kuyruğunda yapılır; sadece
-/// sonucun yayını main thread'e geri alınır. Monitor'ler bu serial kuyrukta
-/// sırayla çağrıldığı için içlerindeki "önceki örnek" state'i thread-safe kalır.
+/// Bu sınıf `@MainActor` (paket genelinde varsayılan izolasyon). Örnekleme
+/// UI'yi bloklamasın diye `Sampler` aktöründe yapılır; buraya yalnızca değer
+/// tipinden oluşan hazır bir `Sample` döner.
+///
+/// Uyarı değerlendirmesi bilinçli olarak MAIN ACTOR'de kalır: AppSettings
+/// okur ve bildirim tetikler. Değerlendirme birkaç karşılaştırmadan ibaret,
+/// main thread'i meşgul etmez.
 final class MetricsManager: ObservableObject {
 
     @Published private(set) var cpu = CPUMetrics()
@@ -14,29 +18,118 @@ final class MetricsManager: ObservableObject {
     @Published private(set) var disk = DiskMetrics()
     @Published private(set) var power = PowerMetrics()
     @Published private(set) var network = NetworkMetrics()
+    @Published private(set) var processes = ProcessMetrics()
+    @Published private(set) var thermal = ThermalMetrics()
+    @Published private(set) var thermalAttribution = ThermalVerdict()
     @Published private(set) var uptime: TimeInterval = 0
     @Published private(set) var health: Int = 0
 
+    /// Aktif uyarılar. AlertEngine'i doğrudan @Published yapmak yerine düz
+    /// diziyi yayınlıyoruz — iç içe ObservableObject SwiftUI'da güncellemeyi
+    /// tetiklemez, bu klasik bir tuzak.
+    @Published private(set) var alerts: [ActiveAlert] = []
+
     let machine: MachineInfo
 
-    private let cpuMonitor = CPUMonitor()
-    private let memoryMonitor = MemoryMonitor()
-    private let diskMonitor = DiskMonitor()
-    private let powerMonitor = PowerMonitor()
-    private let networkMonitor = NetworkMonitor()
+    private let sampler = Sampler()
+    private let alertEngine = AlertEngine()
 
-    private let queue = DispatchQueue(label: "io.github.salihgencer.statusappbar.sampling", qos: .utility)
     private var timer: Timer?
+
+    /// Süren örnekleme turu. Bir tur (özellikle `ps` çağrısının düştüğü tur)
+    /// aralıktan uzun sürerse turlar üst üste binip sonuçları sırasız
+    /// yayınlayabilirdi; bu bayrak binmeyi engeller.
+    private var samplingTask: Task<Void, Never>?
 
     init() {
         machine = MachineInfoProvider.current()
-        start(interval: 1.0)
+        start(interval: AppSettings.shared.refreshInterval)
     }
 
     /// Timer başlatmayan, dışarıdan veri set edilen kurucu (mock/dökümantasyon için).
     private init(machine: MachineInfo) {
         self.machine = machine
     }
+
+    /// Derin analiz ve rapor için anlık tam durum.
+    func snapshot() -> AlertEngine.Snapshot {
+        AlertEngine.Snapshot(
+            cpu: cpu,
+            memory: memory,
+            power: power,
+            thermal: thermal,
+            processes: processes,
+            uptime: uptime,
+            machine: machine
+        )
+    }
+
+    /// Örnekleme aralığını ayarlar / yeniden başlatır.
+    func start(interval: TimeInterval) {
+        timer?.invalidate()
+        // İlk örneği hemen al (kullanıcı menüyü açar açmaz veri görsün).
+        tick()
+        let t = Timer(timeInterval: interval, repeats: true) { [weak self] _ in
+            // Timer RunLoop.main'e eklendiği için gövde her zaman main
+            // thread'de çalışır; `assumeIsolated` bunu derleyiciye bildirir
+            // (yeni bir Task açmak gereksiz gecikme olurdu).
+            MainActor.assumeIsolated {
+                self?.tick()
+            }
+        }
+        // .common mode: menü/popover açıkken (tracking run loop) de timer çalışsın.
+        RunLoop.main.add(t, forMode: .common)
+        timer = t
+    }
+
+    private func tick() {
+        // Önceki tur bitmediyse yenisini başlatma. Aksi halde iki tur aynı
+        // anda aktöre girip sonuçları sırasız yayınlayabilir.
+        guard samplingTask == nil else { return }
+
+        samplingTask = Task { [weak self] in
+            guard let self else { return }
+            let sample = await sampler.sample()
+            apply(sample)
+            samplingTask = nil
+        }
+    }
+
+    /// Aktörden gelen turu yayınlar ve uyarıları değerlendirir.
+    private func apply(_ s: Sampler.Sample) {
+        cpu = s.cpu
+        memory = s.memory
+        disk = s.disk
+        power = s.power
+        network = s.network
+        processes = s.processes
+        thermal = s.thermal
+        uptime = s.uptime
+        health = s.health
+
+        let snapshot = AlertEngine.Snapshot(
+            cpu: s.cpu, memory: s.memory, power: s.power, thermal: s.thermal,
+            processes: s.processes, uptime: s.uptime, machine: machine
+        )
+        // Isınma nedeni çıkarımı uyarı motoruyla aynı anlık veriden beslenir;
+        // popover bölümü, uyarı detayı ve teşhis raporu aynı kararı paylaşır.
+        thermalAttribution = ThermalAttribution.attribute(snapshot)
+        alerts = alertEngine.evaluate(snapshot, settings: AppSettings.shared)
+    }
+
+    /// `isolated deinit`: `Timer` Sendable değil, dolayısıyla izolasyonsuz bir
+    /// deinit'ten ona dokunulamaz. Deinit'i MainActor'de çalıştırmak hem
+    /// derleyiciyi hem de `Timer`'ın "yaratıldığı run loop'ta invalidate et"
+    /// şartını karşılar.
+    isolated deinit {
+        timer?.invalidate()
+        samplingTask?.cancel()
+    }
+}
+
+// MARK: - Dökümantasyon için temsili veri
+
+extension MetricsManager {
 
     /// README görselleri için tamamen TEMSİLİ veri. Gerçek makineden hiçbir
     /// bilgi okumaz; IP, disk adı, donanım vb. hepsi jeneriktir.
@@ -46,19 +139,17 @@ final class MetricsManager: ObservableObject {
             chip: "Apple Silicon",
             totalRAMBytes: 16 * gb,
             coreCount: 10,
-            refreshRateHz: 60,
-            osVersion: "macOS 15.0"
+            refreshRateHz: 120,
+            osVersion: "macOS 26.0"
         )
         let m = MetricsManager(machine: machine)
 
         var cpu = CPUMetrics()
         cpu.total = cpuTotal
         cpu.cores = (0..<10).map { (i: Int) -> Double in
-            if cpuTotal > 0.9 {
-                return i < 5 ? 1.0 : Double((i * 7) % 28) / 100.0
-            } else {
-                return Double((i * 13) % 65) / 100.0
-            }
+            cpuTotal > 0.9
+                ? (i < 5 ? 1.0 : Double((i * 7) % 28) / 100.0)
+                : Double((i * 13) % 65) / 100.0
         }
         cpu.load = [2.10, 1.84, 1.62]
         cpu.pCores = 6
@@ -69,6 +160,7 @@ final class MetricsManager: ObservableObject {
         mem.total = 16 * gb
         mem.used = UInt64(Double(16 * gb) * 0.59)
         mem.free = mem.total - mem.used
+        mem.compressed = UInt64(Double(gb) * 1.4)
         mem.swapTotal = 2 * gb
         mem.swapUsed = UInt64(Double(2 * gb) * 0.28)
         m.memory = mem
@@ -92,6 +184,8 @@ final class MetricsManager: ObservableObject {
         power.healthPercent = 96
         power.adapterWatts = 67
         power.timeRemainingMinutes = 35
+        power.amperageMA = 1800
+        power.voltageMV = 11_700
         m.power = power
 
         var net = NetworkMetrics()
@@ -100,50 +194,27 @@ final class MetricsManager: ObservableObject {
         net.ipAddress = "192.168.1.10" // jenerik özel-ağ örneği
         m.network = net
 
+        var procs = ProcessMetrics()
+        procs.total = 480
+        procs.kernelTaskCPU = cpuTotal > 0.9 ? 31 : 3
+        procs.windowServerRSS = 420 * 1024 * 1024
+        procs.topCPU = [
+            // Mock adları katalogdan gelir: App Store ekran görüntüleri her
+            // dilde üretiliyor, sahte veri bile lokalize olmalı.
+            ProcessRow(pid: 101, name: String(localized: "Örnek Emülatör"), path: "/tmp/emulator",
+                       cpu: cpuTotal > 0.9 ? 290 : 22, rss: 3 * gb),
+            ProcessRow(pid: 102, name: String(localized: "Örnek Tarayıcı"), path: "/tmp/browser",
+                       cpu: 18, rss: 900 * 1024 * 1024)
+        ]
+        procs.topMemory = procs.topCPU
+        procs.sampledAt = Date()
+        m.processes = procs
+
         m.uptime = 187_200 // 2g 4s
-        m.health = HealthScore.compute(cpu: cpu, memory: mem, disk: disk, power: power)
+        // Mock görseller sakin bir makine gösterir; termal durum nominal kalır.
+        m.health = HealthScore.compute(cpu: cpu, memory: mem, disk: disk,
+                                       power: power, thermal: m.thermal)
 
         return m
-    }
-
-    /// Örnekleme aralığını ayarlar / yeniden başlatır.
-    func start(interval: TimeInterval) {
-        timer?.invalidate()
-        // İlk örneği hemen al (kullanıcı menüyü açar açmaz veri görsün).
-        tick()
-        let t = Timer(timeInterval: interval, repeats: true) { [weak self] _ in
-            self?.tick()
-        }
-        // .common mode: menü/popover açıkken (tracking run loop) de timer çalışsın.
-        RunLoop.main.add(t, forMode: .common)
-        timer = t
-    }
-
-    private func tick() {
-        queue.async { [weak self] in
-            guard let self else { return }
-
-            let cpu = self.cpuMonitor.sample()
-            let memory = self.memoryMonitor.sample()
-            let disk = self.diskMonitor.sample()
-            let power = self.powerMonitor.sample()
-            let network = self.networkMonitor.sample()
-            let uptime = ProcessInfo.processInfo.systemUptime
-            let health = HealthScore.compute(cpu: cpu, memory: memory, disk: disk, power: power)
-
-            DispatchQueue.main.async {
-                self.cpu = cpu
-                self.memory = memory
-                self.disk = disk
-                self.power = power
-                self.network = network
-                self.uptime = uptime
-                self.health = health
-            }
-        }
-    }
-
-    deinit {
-        timer?.invalidate()
     }
 }

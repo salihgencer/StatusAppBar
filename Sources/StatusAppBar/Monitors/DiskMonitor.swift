@@ -5,7 +5,7 @@ import IOKit
 ///  1) Volume doluluk oranları -> FileManager / URLResourceValues
 ///  2) Anlık okuma/yazma hızı   -> IOKit "IOBlockStorageDriver" registry sayaçları
 /// Sayaçlar kümülatif olduğu için hız, iki ölçüm arası fark / geçen süre.
-final class DiskMonitor {
+nonisolated final class DiskMonitor {
 
     private var prevRead: UInt64 = 0
     private var prevWrite: UInt64 = 0

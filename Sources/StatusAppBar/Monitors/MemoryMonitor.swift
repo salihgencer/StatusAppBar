@@ -6,7 +6,13 @@ import Foundation
 ///   used = active + inactive + wired + compressed − purgeable − external(file-backed)
 /// Bu formül, dosya cache'i ve geri alınabilir (purgeable) belleği "kullanımda"
 /// saymaz; gerçekten uygulamaların tuttuğu belleği gösterir.
-final class MemoryMonitor {
+nonisolated final class MemoryMonitor {
+
+    /// Swap giriş/çıkış hızını hesaplamak için önceki örneğin sayaçları.
+    /// Sayaçlar kümülatiftir (açılıştan beri); anlamlı olan farkıdır.
+    private var lastSwapIns: UInt64 = 0
+    private var lastSwapOuts: UInt64 = 0
+    private var lastSampleAt: Date?
 
     func sample() -> MemoryMetrics {
         var metrics = MemoryMetrics()
@@ -45,6 +51,7 @@ final class MemoryMonitor {
 
         metrics.used = min(used, metrics.total)
         metrics.free = metrics.total > metrics.used ? metrics.total - metrics.used : 0
+        metrics.compressed = compressed
 
         // Swap kullanımı ayrı bir sysctl ile gelir.
         var swap = xsw_usage()
@@ -53,6 +60,25 @@ final class MemoryMonitor {
             metrics.swapTotal = swap.xsu_total
             metrics.swapUsed = swap.xsu_used
         }
+
+        // Swap trafiği: sayaçlar kümülatif olduğu için farkı zamana böleriz.
+        // İlk örnekte referans yok — hız 0 bırakılır (yanlış tepe göstermesin).
+        let now = Date()
+        let ins = stats.swapins
+        let outs = stats.swapouts
+        if let previous = lastSampleAt {
+            let elapsed = now.timeIntervalSince(previous)
+            if elapsed > 0.05 {
+                // Sayaç geri sarabilir (nadiren); negatif farkı 0 say.
+                let dIn = ins >= lastSwapIns ? ins - lastSwapIns : 0
+                let dOut = outs >= lastSwapOuts ? outs - lastSwapOuts : 0
+                metrics.swapInsPerSec = Double(dIn) * Double(page) / elapsed
+                metrics.swapOutsPerSec = Double(dOut) * Double(page) / elapsed
+            }
+        }
+        lastSwapIns = ins
+        lastSwapOuts = outs
+        lastSampleAt = now
 
         return metrics
     }

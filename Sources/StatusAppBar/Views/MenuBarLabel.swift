@@ -2,130 +2,141 @@ import AppKit
 import SwiftUI
 
 /// Menu bar'da (üst bardaki dar alanda) görünen canlı etiket.
-/// Ayarlardan açık olan metrikleri kompakt biçimde gösterir; metrikler her
-/// güncellendiğinde otomatik yeniden çizilir (canlı görünüm).
 ///
-/// İçeriği `ImageRenderer` ile tek bir `NSImage`'e çiziyoruz (MenuBarExtra
-/// etiketi ikon+metin birleşimini güvenilir render etmiyor). Renk strese göre
-/// değişir: sistem rahatken sönük/nötr (menu bar'a uyumlu), yük arttıkça
-/// kırmızıya döner. Bu yüzden template DEĞİL, renkli çiziyoruz ve temel rengi
-/// menu bar görünümüne göre kendimiz seçiyoruz.
+/// ÇÖZÜLEN İKİ SORUN:
+///
+/// 1. GÖRÜNMEZLİK. Çentikli MacBook'larda menu bar'ın kullanılabilir alanı
+///    çentikte biter. Etiket genişse ve barda çok öğe varsa macOS öğeyi
+///    çentiğin ALTINA iter — uygulama çalışır ama hiçbir şey görünmez, uyarı
+///    da vermez. macOS bunu tespit etmek için API sunmuyor, dolayısıyla tek
+///    güvenilir çözüm dar başlamak: varsayılan mod artık `.adaptive` — sakin
+///    zamanda ~12 px'lik bir nokta, sorun çıkınca kendisi genişliyor.
+///
+/// 2. KENDİ TÜKETİMİ. Etiketi `ImageRenderer` ile NSImage'e çizmek pahalı bir
+///    iş; her saniye yapıldığında izleme aracı sistemin en çok CPU yakan
+///    uygulamalarından biri hâline geliyordu. Artık çizilen içerik gerçekten
+///    değişmedikçe önbellekten dönüyor.
 struct MenuBarLabel: View {
     @ObservedObject var metrics: MetricsManager
     @ObservedObject var settings: AppSettings
 
     var body: some View {
-        if let image = renderLabelImage() {
+        if let image = MenuBarLabelRenderer.shared.image(for: descriptor()) {
             Image(nsImage: image)
         } else {
-            Text("Status")
+            Image(systemName: "gauge.with.dots.needle.33percent")
         }
     }
 
-    private struct Segment {
-        var icon: String
-        var text: String
-        var width: CGFloat   // değer alanının sabit genişliği (sağa hizalı)
+    /// Çizilecek her şeyi tanımlayan değer tipi. Eşitse yeniden çizmeye gerek
+    /// yok — önbellek anahtarı olarak da bunu kullanıyoruz.
+    private func descriptor() -> LabelDescriptor {
+        let stress = stressLevel()
+        let worstSeverity = metrics.alerts.map(\.severity).max()
+
+        return LabelDescriptor(
+            mode: effectiveMode(stress: stress, hasAlert: worstSeverity != nil),
+            segments: segments(),
+            compact: compactSegment(),
+            // Rengi 20 kademeye yuvarlıyoruz: gözle ayırt edilemeyen 0.001'lik
+            // değişimler yüzünden yeniden çizim yapmayalım.
+            stressStep: Int((stress * 20).rounded()),
+            alertLevel: worstSeverity?.rawValue ?? -1,
+            showIcons: settings.showIcons,
+            isDark: Self.isDarkMenuBar
+        )
     }
 
-    // Sabit alan genişlikleri: değer kısalsa da bu kadar yer rezerve edilir,
-    // böylece rakam değişince toplam genişlik (ve öğe konumu) sabit kalır.
-    private let fontSize: CGFloat = 13       // menu bar yazı boyutu
-    private let percentWidth: CGFloat = 33   // "100%"
-    private let rateWidth: CGFloat = 44      // "12.3M", "1023K", "0"
+    // MARK: - Mod seçimi
 
-    private func segments() -> [Segment] {
-        var result: [Segment] = []
+    private func effectiveMode(stress: Double, hasAlert: Bool) -> MenuBarMode {
+        switch settings.menuBarMode {
+        case .adaptive:
+            // Uyarı varsa ya da sistem gerçekten zorlanıyorsa genişle.
+            return (hasAlert || stress >= 0.5) ? .compact : .minimal
+        default:
+            return settings.menuBarMode
+        }
+    }
+
+    // MARK: - Segmentler
+
+    private func segments() -> [LabelSegment] {
+        var result: [LabelSegment] = []
         if settings.showCPU {
-            result.append(Segment(icon: "cpu", text: Fmt.percent(metrics.cpu.total, decimals: 0), width: percentWidth))
+            result.append(LabelSegment(icon: "cpu",
+                                       text: Fmt.percent(metrics.cpu.total, decimals: 0),
+                                       width: 33))
         }
         if settings.showRAM {
-            result.append(Segment(icon: "memorychip", text: Fmt.percent(metrics.memory.usedFraction, decimals: 0), width: percentWidth))
+            result.append(LabelSegment(icon: "memorychip",
+                                       text: Fmt.percent(metrics.memory.usedFraction, decimals: 0),
+                                       width: 33))
         }
         if settings.showDisk {
             let io = metrics.disk.readPerSec + metrics.disk.writePerSec
-            result.append(Segment(icon: "internaldrive", text: Fmt.rateCompact(io), width: rateWidth))
+            result.append(LabelSegment(icon: "internaldrive", text: Fmt.rateCompact(io), width: 44))
         }
         if settings.showNetwork {
-            // İki yön: ↓ download, ↑ upload.
-            result.append(Segment(icon: "arrow.down", text: Fmt.rateCompact(metrics.network.downPerSec), width: rateWidth))
-            result.append(Segment(icon: "arrow.up", text: Fmt.rateCompact(metrics.network.upPerSec), width: rateWidth))
+            result.append(LabelSegment(icon: "arrow.down",
+                                       text: Fmt.rateCompact(metrics.network.downPerSec), width: 44))
+            result.append(LabelSegment(icon: "arrow.up",
+                                       text: Fmt.rateCompact(metrics.network.upPerSec), width: 44))
         }
         return result
     }
 
-    // MARK: - Stres -> renk
+    /// Dar modda gösterilecek TEK metrik: o an en çok baskı altında olan.
+    /// Sabit bir metrik göstermek yerine "en kötüyü" göstermek, tek rakamdan
+    /// gerçek bilgi almayı sağlar.
+    private func compactSegment() -> LabelSegment {
+        let candidates: [(pressure: Double, icon: String, text: String)] = [
+            (metrics.memory.swapFraction, "arrow.triangle.swap",
+             Fmt.percent(metrics.memory.swapFraction, decimals: 0)),
+            (metrics.cpu.total, "cpu",
+             Fmt.percent(metrics.cpu.total, decimals: 0)),
+            (metrics.memory.usedFraction, "memorychip",
+             Fmt.percent(metrics.memory.usedFraction, decimals: 0))
+        ]
+        let worst = candidates.max { $0.pressure < $1.pressure } ?? candidates[1]
+        return LabelSegment(icon: worst.icon, text: worst.text, width: 33)
+    }
 
-    /// 0 (rahat) ... 1 (tam yük). Esas sürücü CPU; RAM yalnızca çok yüksekken katkı verir.
-    /// CPU eşiği günlük kullanımda görünür olsun diye düşük tutulur: ortalama CPU
-    /// ~%25'te renklenmeye başlar, ~%75'te tam kırmızı.
+    // MARK: - Stres
+
+    /// 0 (rahat) ... 1 (tam yük). CPU esas sürücü; RAM ve swap yalnızca
+    /// gerçekten yüksekken katkı verir.
     private func stressLevel() -> Double {
         let cpuStress = ramp(metrics.cpu.total, from: 0.25, to: 0.75)
         let ramStress = ramp(metrics.memory.usedFraction, from: 0.85, to: 0.98)
-        return max(cpuStress, ramStress)
+        let swapStress = ramp(metrics.memory.swapFraction, from: 0.60, to: 0.90)
+        return max(cpuStress, max(ramStress, swapStress))
     }
 
-    /// value'yu [from, to] aralığında 0...1'e lineer eşler (dışı clamp'lenir).
     private func ramp(_ value: Double, from: Double, to: Double) -> Double {
         guard to > from else { return value >= to ? 1 : 0 }
         return min(1, max(0, (value - from) / (to - from)))
     }
 
-    /// Strese göre mürekkep rengi: nötr (menu bar temel rengi) -> kırmızı,
-    /// rahatken hafif şeffaf, yük arttıkça opak.
-    private func inkColor(stress: Double) -> Color {
-        let isDark = NSApp.effectiveAppearance
-            .bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
-        let base: CGFloat = isDark ? 1.0 : 0.0   // koyu bar -> beyaz, açık bar -> siyah
-
-        // Hedef kırmızı.
-        let target = (r: CGFloat(0.95), g: CGFloat(0.27), b: CGFloat(0.27))
-        let s = CGFloat(stress)
-        let r = base + (target.r - base) * s
-        let g = base + (target.g - base) * s
-        let b = base + (target.b - base) * s
-
-        // Rahatken biraz şeffaf (sönük), yük arttıkça tam opak.
-        let alpha = 0.65 + 0.35 * s
-
-        return Color(nsColor: NSColor(srgbRed: r, green: g, blue: b, alpha: alpha))
+    static var isDarkMenuBar: Bool {
+        NSApp.effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua
     }
+}
 
-    // MARK: - Render
+// MARK: - Çizim tanımı
 
-    @ViewBuilder
-    private func labelContent(_ segs: [Segment], ink: Color) -> some View {
-        HStack(spacing: 8) {
-            ForEach(Array(segs.enumerated()), id: \.offset) { _, seg in
-                HStack(spacing: 3) {
-                    if settings.showIcons {
-                        Image(systemName: seg.icon)
-                            .imageScale(.small)
-                            .frame(width: 16, alignment: .center) // ikon alanı da sabit
-                    }
-                    Text(seg.text)
-                        .frame(width: seg.width, alignment: .leading) // değer alanı sabit; sayı ikonuna yapışır
-                }
-            }
-        }
-        // Tam monospaced: rakamlar VE harfler (% K M) eşit genişlik -> kayma yok.
-        .font(.system(size: fontSize, weight: .regular, design: .monospaced))
-        .foregroundStyle(ink)
-        .padding(.vertical, 1)
-        .fixedSize() // metin asla kırpılmasın; her zaman ideal genişlikte çiz
-    }
+struct LabelSegment: Equatable {
+    var icon: String
+    var text: String
+    var width: CGFloat
+}
 
-    @MainActor
-    private func renderLabelImage() -> NSImage? {
-        let segs = segments()
-        guard !segs.isEmpty else { return nil }
-
-        let ink = inkColor(stress: stressLevel())
-        let renderer = ImageRenderer(content: labelContent(segs, ink: ink))
-        renderer.scale = NSScreen.main?.backingScaleFactor ?? 2
-        guard let image = renderer.nsImage else { return nil }
-        // Renkli çiziyoruz; sistem yeniden renklendirmesin.
-        image.isTemplate = false
-        return image
-    }
+struct LabelDescriptor: Equatable {
+    var mode: MenuBarMode
+    var segments: [LabelSegment]
+    var compact: LabelSegment
+    var stressStep: Int
+    var alertLevel: Int
+    var showIcons: Bool
+    var isDark: Bool
 }

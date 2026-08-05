@@ -7,6 +7,14 @@ Package.resolved
 *.app/
 *.zip
 DerivedData/
+build/
+
+# XcodeGen — .xcodeproj her koşuda project.yml'den üretilir, git'e girmez
+StatusAppBar.xcodeproj/
+
+# fastlane çıktıları
+fastlane/report.xml
+fastlane/test_output/
 
 # Xcode
 xcuserdata/

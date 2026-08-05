@@ -1,0 +1,1 @@
+StatusAppBar ilk sürümüyle App Store'da: canlı menü çubuğu göstergesi, akıllı uyarılar ve Gemini destekli derin analiz.

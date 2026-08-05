@@ -7,15 +7,43 @@
     <key>CFBundleDisplayName</key>
     <string>StatusAppBar</string>
     <key>CFBundleIdentifier</key>
-    <string>io.github.salihgencer.statusappbar</string>
+    <string>com.salihgencer.statusappbar</string>
     <key>CFBundleVersion</key>
-    <string>3</string>
+    <string>5</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.2.0</string>
+    <string>1.3.0</string>
+    <!-- İkon: hem build.sh (Resources/AppIcon.icns kopyalar) hem Xcode
+         (Resources kaynak olarak dahil) aynı dosyayı kullanır. -->
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
+    <!-- HTTPS standart muafiyet — App Store Connect şifreleme beyanı "exempt". -->
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
+    <!-- Kaynak dil Türkçe; İngilizce çeviriler Localizable.xcstrings'ten
+         gelen en.lproj ile sağlanır. -->
+    <key>CFBundleDevelopmentRegion</key>
+    <string>tr</string>
+    <key>CFBundleLocalizations</key>
+    <array>
+        <string>tr</string>
+        <string>en</string>
+    </array>
     <key>CFBundleExecutable</key>
     <string>StatusAppBar</string>
+    <!-- Aşağıdaki dört anahtar olmadan macOS bundle'ı "tam bir uygulama"
+         saymıyor; Notification Center kaydı bu yüzden reddedilebiliyor. -->
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleSupportedPlatforms</key>
+    <array>
+        <string>MacOSX</string>
+    </array>
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.utilities</string>
     <key>LSMinimumSystemVersion</key>
     <string>14.0</string>
     <!-- LSUIElement: Dock'ta ikon gösterme, sadece menu bar uygulaması olarak çalış -->

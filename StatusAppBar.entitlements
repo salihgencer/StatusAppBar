@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Yalnızca MAS (App Store) build'i kullanır; ücretsiz SwiftPM build'i
+         sandbox'suzdur. Gereksiz entitlement eklemek review sorusu doğurur —
+         bu ikisi yeterli: sandbox zorunlu, network client Gemini çağrısı için. -->
+    <key>com.apple.security.app-sandbox</key>
+    <true/>
+    <key>com.apple.security.network.client</key>
+    <true/>
+</dict>
+</plist>

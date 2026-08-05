@@ -1,0 +1,190 @@
+# StatusAppBar — macOS (Mac App Store) fastlane lane'leri.
+# Kullanım (repo kökünden):
+#   fastlane mac build     → App Store arşivi + PKG üret (build/)
+#   fastlane mac beta      → PKG üret + TestFlight'a yükle
+#   fastlane mac release   → PKG üret + App Store'a yükle (incelemeye göndermez)
+#   fastlane mac metadata  → yalnızca metadata + screenshots yükle
+#   fastlane mac submit    → mevcut sürümü App Store incelemesine gönder
+#   fastlane mac register  → App ID + ASC uygulama kaydı (ilk kurulum, bir kez)
+#
+# Kimlik: ASC API anahtarı ~/.appstoreconnect/config (ASC_KEY_ID/ASC_ISSUER_ID)
+# + ~/.appstoreconnect/private_keys/AuthKey_$ASC_KEY_ID.p8 dosyasından okunur.
+# İmzalama: Kerim Öz'ün ücretli takımı (A6R928V6HS), otomatik imzalama.
+#
+# NOT: Ücretsiz GitHub sürümü bu hattı KULLANMAZ — o hâlâ build.sh/release.sh
+# ile SwiftPM'den üretilir. Bu lane'ler yalnızca ücretli MAS varyantı içindir
+# (project.yml'deki MAS derleme bayrağı + sandbox entitlement'ları).
+
+default_platform(:mac)
+
+TEAM_ID = ENV["APPLE_TEAM_ID"] || "A6R928V6HS"
+
+before_all do
+  # ASC API anahtarını fastlane'in beklediği env adlarına eşle.
+  config_path = File.expand_path("~/.appstoreconnect/config")
+  if File.exist?(config_path)
+    File.foreach(config_path) do |line|
+      k, v = line.strip.split("=", 2)
+      next if k.nil? || v.nil? || v.empty?
+      ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"] ||= v if k == "ASC_KEY_ID"
+      ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"] ||= v if k == "ASC_ISSUER_ID"
+    end
+    key_id = ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"]
+    ENV["APP_STORE_CONNECT_API_KEY_KEY_FILEPATH"] ||=
+      File.expand_path("~/.appstoreconnect/private_keys/AuthKey_#{key_id}.p8") if key_id
+  end
+
+  # StatusAppBar.xcodeproj repoda yok; her koşuda project.yml'den taze üret.
+  # (fastlane lane'leri fastlane/ dizininden çalışır — proje köküne çık.)
+  sh("cd .. && xcodegen generate")
+end
+
+platform :mac do
+  desc "App ID + App Store Connect uygulama kaydı (ilk kurulumda bir kez)"
+  lane :register do
+    require "spaceship"
+    bundle_id = CredentialsManager::AppfileConfig.try_fetch_value(:app_identifier)
+    token = Spaceship::ConnectAPI::Token.create(
+      key_id: ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"],
+      issuer_id: ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"],
+      filepath: ENV["APP_STORE_CONNECT_API_KEY_KEY_FILEPATH"]
+    )
+    Spaceship::ConnectAPI.token = token
+
+    # 1) Bundle ID (varsa bul, yoksa oluştur) — platform: macOS
+    bundle = Spaceship::ConnectAPI::BundleId.find(bundle_id)
+    if bundle.nil?
+      Spaceship::ConnectAPI::BundleId.create(
+        name: "StatusAppBar",
+        identifier: bundle_id,
+        platform: Spaceship::ConnectAPI::BundleIdPlatform::MAC_OS
+      )
+      UI.success("Bundle ID olusturuldu: #{bundle_id}")
+    else
+      UI.message("Bundle ID zaten var: #{bundle_id}")
+    end
+
+    # 2) ASC uygulama kaydı (varsa atla) — macOS platformu
+    if Spaceship::ConnectAPI::App.find(bundle_id).nil?
+      Spaceship::ConnectAPI::App.create(
+        name: "StatusAppBar",
+        version_string: "1.3.0",
+        sku: "statusappbar",
+        primary_locale: "tr-TR",
+        bundle_id: bundle_id,
+        platforms: ["MAC_OS"]
+      )
+      UI.success("ASC uygulamasi olusturuldu: StatusAppBar")
+    else
+      UI.message("ASC uygulamasi zaten var")
+    end
+  end
+
+  desc "App Store arşivi + PKG üret"
+  lane :build do
+    build_app(
+      project: "StatusAppBar.xcodeproj",
+      scheme: "StatusAppBar",
+      export_method: "app-store",
+      output_directory: "build",
+      output_name: "StatusAppBar",
+      clean: true,
+      xcargs: "-allowProvisioningUpdates DEVELOPMENT_TEAM=#{TEAM_ID}",
+      export_options: {
+        teamID: TEAM_ID,
+        signingStyle: "automatic"
+      }
+    )
+  end
+
+  desc "PKG üret + TestFlight'a yükle"
+  lane :beta do
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch("APP_STORE_CONNECT_API_KEY_KEY_ID"),
+      issuer_id: ENV.fetch("APP_STORE_CONNECT_API_KEY_ISSUER_ID"),
+      key_filepath: ENV.fetch("APP_STORE_CONNECT_API_KEY_KEY_FILEPATH")
+    )
+    build
+    upload_to_testflight(
+      api_key: api_key,
+      pkg: "build/StatusAppBar.pkg",
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc "PKG üret + App Store'a yükle (incelemeye GÖNDERMEZ)"
+  lane :release do
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch("APP_STORE_CONNECT_API_KEY_KEY_ID"),
+      issuer_id: ENV.fetch("APP_STORE_CONNECT_API_KEY_ISSUER_ID"),
+      key_filepath: ENV.fetch("APP_STORE_CONNECT_API_KEY_KEY_FILEPATH")
+    )
+    build
+    upload_to_app_store(
+      api_key: api_key,
+      platform: "osx",
+      pkg: "build/StatusAppBar.pkg",
+      skip_metadata: true,
+      skip_screenshots: true,
+      submit_for_review: false,
+      automatic_release: false,
+      force: true
+    )
+  end
+
+  desc "Yalnızca metadata + screenshots yükle (fastlane/metadata/tr, screenshots/tr)"
+  lane :metadata do
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch("APP_STORE_CONNECT_API_KEY_KEY_ID"),
+      issuer_id: ENV.fetch("APP_STORE_CONNECT_API_KEY_ISSUER_ID"),
+      key_filepath: ENV.fetch("APP_STORE_CONNECT_API_KEY_KEY_FILEPATH")
+    )
+    upload_to_app_store(
+      api_key: api_key,
+      platform: "osx",
+      app_version: "1.3.0",
+      skip_binary_upload: true,
+      skip_screenshots: false,
+      overwrite_screenshots: true,
+      force: true,
+      precheck_include_in_app_purchases: false
+      # Fiyat ($4.99 / Tier 5) ASC web'den ayarlanır: deliver'ın price_tier
+      # çağrısı 'availableInNewTerritories' özniteliğiyle ASC API'sine takılıyor.
+    )
+  end
+
+  desc "App Store'daki mevcut sürümü incelemeye gönder"
+  lane :submit do
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch("APP_STORE_CONNECT_API_KEY_KEY_ID"),
+      issuer_id: ENV.fetch("APP_STORE_CONNECT_API_KEY_ISSUER_ID"),
+      key_filepath: ENV.fetch("APP_STORE_CONNECT_API_KEY_KEY_FILEPATH")
+    )
+    upload_to_app_store(
+      api_key: api_key,
+      platform: "osx",
+      app_version: "1.3.0",
+      skip_binary_upload: true,
+      skip_metadata: true,
+      skip_screenshots: true,
+      submit_for_review: true,
+      automatic_release: false,
+      force: true,
+      precheck_include_in_app_purchases: false,
+      submission_information: {
+        add_id_info_uses_idfa: false,
+        export_compliance_uses_encryption: false,
+        content_rights_contains_third_party_content: false,
+        content_rights_has_rights: true
+      },
+      app_review_information: {
+        notes: "Menu bar system monitor. The AI deep-analysis feature is OPTIONAL: " \
+               "the user enters their own API key (Gemini/Claude/OpenAI) or points to " \
+               "their own local server (Ollama/LM Studio). The app is fully functional " \
+               "without it; no demo account is needed. Launch-at-login is a user " \
+               "toggle in Settings (SMAppService, guideline 2.4.5(iii)). The process " \
+               "list intentionally shows only the current user's processes (sandbox)."
+      }
+    )
+  end
+end

@@ -4,7 +4,7 @@ import Foundation
 /// Ağ trafiği `getifaddrs` ile okunur. Her arayüzün (en0, en1...) kümülatif
 /// gelen/giden byte sayacı `if_data` içinde bulunur; hız = fark / geçen süre.
 /// Sadece fiziksel "en*" arayüzlerini sayarız (loopback, utun, bridge hariç).
-final class NetworkMonitor {
+nonisolated final class NetworkMonitor {
 
     private var prevRx: UInt64 = 0
     private var prevTx: UInt64 = 0
@@ -83,7 +83,9 @@ final class NetworkMonitor {
                 NI_NUMERICHOST
             )
             guard result == 0 else { continue }
-            let ip = String(cString: host)
+            // host null-terminated bir C dizisi; sonlandırıcıdan itibarenini at.
+            let ip = String(decoding: host.prefix { $0 != 0 }.map { UInt8(bitPattern: $0) },
+                            as: UTF8.self)
 
             // en0 tercih edilir; yoksa ilk bulunan en* fallback.
             if name == "en0" { return ip }

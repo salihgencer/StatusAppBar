@@ -1,0 +1,1447 @@
+{
+  "sourceLanguage": "tr",
+  "strings": {
+    "\nEn çok CPU: %@ %%%ld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "\nTop CPU: %@ %%%ld"
+          }
+        }
+      }
+    },
+    "\nEn çok RAM: %@ · %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "\nMost RAM: %@ · %@"
+          }
+        }
+      }
+    },
+    " Sistem şu an aktif olarak diske takas yapıyor — CPU'nun bir kısmı bu işe gidiyor, fan bu yüzden dönüyor.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " The system is actively paging to disk right now — part of the CPU goes to that work, which is why the fan is spinning."
+          }
+        }
+      }
+    },
+    " · RAM %@/%@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " · RAM %@/%@"
+          }
+        }
+      }
+    },
+    " · WindowServer %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " · WindowServer %@"
+          }
+        }
+      }
+    },
+    " · kernel_task %%%.0f": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " · kernel_task %%%.0f"
+          }
+        }
+      }
+    },
+    " · swap %%%ld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " · swap %%%ld"
+          }
+        }
+      }
+    },
+    " · sıkıştırılmış %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " · compressed %@"
+          }
+        }
+      }
+    },
+    " · tahmini %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " · est. %@"
+          }
+        }
+      }
+    },
+    "%.1f W · pil %%%.0f": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%.1f W · battery %%%.0f"
+          }
+        }
+      }
+    },
+    "%@ %%%ld CPU": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ %%%ld CPU"
+          }
+        }
+      }
+    },
+    "%@ (PID %d) — SIGTERM gönderilecek. Kaydedilmemiş işler kaybolabilir.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ (PID %d) — SIGTERM will be sent. Unsaved work may be lost."
+          }
+        }
+      }
+    },
+    "%@ ayarlanmamış — \"Raporu kopyala\" ile tam teşhis metnini alıp istediğin yere yapıştırabilirsin.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is not configured — use \"Copy report\" to copy the full diagnostic text and paste it wherever you like."
+          }
+        }
+      }
+    },
+    "%@ ayarlanmamış — panelde Ayarlar → Derin analiz.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is not configured — in the panel: Settings → Deep analysis."
+          }
+        }
+      }
+    },
+    "%@ normale döndü": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is back to normal"
+          }
+        }
+      }
+    },
+    "%@ uygulamasını kapatmak en hızlı rahatlama.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quitting %@ is the fastest relief."
+          }
+        }
+      }
+    },
+    "%ld gündür açık": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Up for %ld days"
+          }
+        }
+      }
+    },
+    "AI bir prosesi sonlandırmak istiyor": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The AI wants to terminate a process"
+          }
+        }
+      }
+    },
+    "API anahtarı": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API key"
+          }
+        }
+      }
+    },
+    "API anahtarı girilmemiş. Ayarlar → Derin analiz.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API key is missing. Settings → Deep analysis."
+          }
+        }
+      }
+    },
+    "Activity Monitor'de aç": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open in Activity Monitor"
+          }
+        }
+      }
+    },
+    "Aktif (kernel_task %%%.0f)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active (kernel_task %.0f%%)"
+          }
+        }
+      }
+    },
+    "Anahtar bu Mac'te UserDefaults içinde saklanır (şifrelenmez). Analiz yalnızca butona bastığında gönderilir.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The key is stored in UserDefaults on this Mac (unencrypted). Analysis is sent only when you press the button."
+          }
+        }
+      }
+    },
+    "Analiz ediliyor…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Analyzing…"
+          }
+        }
+      }
+    },
+    "Anthropic API anahtarı girilmemiş. Ayarlar → Derin analiz.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anthropic API key is missing. Settings → Deep analysis."
+          }
+        }
+      }
+    },
+    "Açık uygulamaları azalt.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reduce the number of open apps."
+          }
+        }
+      }
+    },
+    "Açılışta başlat": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Launch at login"
+          }
+        }
+      }
+    },
+    "Bağlantı kuruldu ama model listesi boş.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connected, but the model list is empty."
+          }
+        }
+      }
+    },
+    "Bekleme": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cooldown"
+          }
+        }
+      }
+    },
+    "Bellek baskısı": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memory pressure"
+          }
+        }
+      }
+    },
+    "Bellek baskısı (swap)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Memory pressure (swap)"
+          }
+        }
+      }
+    },
+    "Bildirim ayarları": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notification settings"
+          }
+        }
+      }
+    },
+    "Bildirim durumu bilinmiyor": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notification status unknown"
+          }
+        }
+      }
+    },
+    "Bildirim izni alınamadı — yedek yol kullanılıyor": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not obtain notification permission — using the fallback path"
+          }
+        }
+      }
+    },
+    "Bildirim izni bekleniyor": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for notification permission"
+          }
+        }
+      }
+    },
+    "Bildirim izni kapalı — Sistem Ayarları → Bildirimler'den aç": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notification permission is off — enable it in System Settings → Notifications"
+          }
+        }
+      }
+    },
+    "Bildirimler açık": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications enabled"
+          }
+        }
+      }
+    },
+    "Bilerek çalıştırmadıysan kapat. Emülatör/simülatör, izleyici (watch) süreçleri ve takılmış build'ler en sık sebepler.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "If you didn't run it on purpose, quit it. Emulators/simulators, watcher processes and stuck builds are the most common causes."
+          }
+        }
+      }
+    },
+    "Bilinmiyor": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unknown"
+          }
+        }
+      }
+    },
+    "Boştaki bir MacBook 3-8 W çeker. Bu seviye arka planda ağır bir iş olduğunu gösterir — en çok CPU kullanan prosesle başla.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An idle MacBook draws 3-8 W. This level means heavy background work — start with the process using the most CPU."
+          }
+        }
+      }
+    },
+    "Bundle dışı çalışıyor — yedek yol kullanılıyor": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Running without a bundle — using the fallback path"
+          }
+        }
+      }
+    },
+    "Bunu gördüysen uyarı zinciri çalışıyor.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "If you can see this, the alert pipeline is working."
+          }
+        }
+      }
+    },
+    "CPU canavarı": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU hog"
+          }
+        }
+      }
+    },
+    "CPU eşiği": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CPU threshold"
+          }
+        }
+      }
+    },
+    "Claude boş yanıt döndü.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude returned an empty response."
+          }
+        }
+      }
+    },
+    "Claude hatası (%ld): %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude error (%ld): %@"
+          }
+        }
+      }
+    },
+    "Dar": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compact"
+          }
+        }
+      }
+    },
+    "Derin analiz": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deep analysis"
+          }
+        }
+      }
+    },
+    "Derin analiz (AI)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deep analysis (AI)"
+          }
+        }
+      }
+    },
+    "Doğrula ve modelleri getir": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Validate & fetch models"
+          }
+        }
+      }
+    },
+    "Durum": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "State"
+          }
+        }
+      }
+    },
+    "Durum düzeldi.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The condition has cleared."
+          }
+        }
+      }
+    },
+    "Düşünüyor…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thinking…"
+          }
+        }
+      }
+    },
+    "En olası neden: %@ (%%%ld CPU)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Most likely cause: %@ (%ld%% CPU)"
+          }
+        }
+      }
+    },
+    "En olası neden: bellek baskısı — takas trafiği yoğun (dolaylı)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Most likely cause: memory pressure — heavy swap traffic (indirect)"
+          }
+        }
+      }
+    },
+    "En olası neden: şarj — güç girişi ısı üretir": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Most likely cause: charging — power input generates heat"
+          }
+        }
+      }
+    },
+    "En çok tüketenler": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Top consumers"
+          }
+        }
+      }
+    },
+    "Gemini API anahtarı girilmemiş. Ayarlar → Derin analiz.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemini API key is missing. Settings → Deep analysis."
+          }
+        }
+      }
+    },
+    "Gemini boş yanıt döndü.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemini returned an empty response."
+          }
+        }
+      }
+    },
+    "Gemini hatası (%ld): %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemini error (%ld): %@"
+          }
+        }
+      }
+    },
+    "Genişlik": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Width"
+          }
+        }
+      }
+    },
+    "Güncel durum": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Current status"
+          }
+        }
+      }
+    },
+    "Ilıman": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fair"
+          }
+        }
+      }
+    },
+    "Kritik": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Critical"
+          }
+        }
+      }
+    },
+    "Kritik uyarılarda ses": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sound on critical alerts"
+          }
+        }
+      }
+    },
+    "Menu bar'da göster": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show in menu bar"
+          }
+        }
+      }
+    },
+    "Model": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Model"
+          }
+        }
+      }
+    },
+    "Model boş yanıt döndü.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The model returned an empty response."
+          }
+        }
+      }
+    },
+    "Model seçilmemiş — Ayarlar → Derin analiz'den \"Doğrula\" ile listeyi çekip seç.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No model selected — in Settings → Deep analysis, use \"Validate\" to fetch the list and pick one."
+          }
+        }
+      }
+    },
+    "Neden": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cause"
+          }
+        }
+      }
+    },
+    "Neden belirlenemedi — GPU yükü bu uygulamadan ölçülemiyor": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cause undetermined — GPU load cannot be measured from this app"
+          }
+        }
+      }
+    },
+    "Nokta": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dot"
+          }
+        }
+      }
+    },
+    "Normal": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Normal"
+          }
+        }
+      }
+    },
+    "Otomatik": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auto"
+          }
+        }
+      }
+    },
+    "PID %d kopyala": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy PID %d"
+          }
+        }
+      }
+    },
+    "Pil %.0f W çekiyor": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Battery drawing %.0f W"
+          }
+        }
+      }
+    },
+    "Pil tüketimi": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Battery drain"
+          }
+        }
+      }
+    },
+    "Pil çekişi": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Battery draw"
+          }
+        }
+      }
+    },
+    "Raporu kopyala": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy report"
+          }
+        }
+      }
+    },
+    "Reddet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deny"
+          }
+        }
+      }
+    },
+    "Sen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You"
+          }
+        }
+      }
+    },
+    "Sistem anlık görüntüsü gönderildi": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System snapshot sent"
+          }
+        }
+      }
+    },
+    "Sistem kendini kısıyor. Havalandırmayı kontrol et, ağır süreçleri duraklat.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The system is throttling itself. Check ventilation and pause heavy processes."
+          }
+        }
+      }
+    },
+    "Sohbet açık — %ld mesaj": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chat open — %ld messages"
+          }
+        }
+      }
+    },
+    "Sohbeti aç": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open chat"
+          }
+        }
+      }
+    },
+    "Sonlandır": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminate"
+          }
+        }
+      }
+    },
+    "Soğutma": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cooling"
+          }
+        }
+      }
+    },
+    "StatusAppBar test bildirimi": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "StatusAppBar test notification"
+          }
+        }
+      }
+    },
+    "Sunucu adresi": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server address"
+          }
+        }
+      }
+    },
+    "Sunucu hatası (%ld): %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server error (%ld): %@"
+          }
+        }
+      }
+    },
+    "Sunucuya ulaşılamadı (%@). Ollama / LM Studio çalışıyor mu?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server unreachable (%@). Is Ollama / LM Studio running?"
+          }
+        }
+      }
+    },
+    "Swap %%%ld dolu": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap %%%ld full"
+          }
+        }
+      }
+    },
+    "Swap %@ / %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap %@ / %@"
+          }
+        }
+      }
+    },
+    "Swap eşiği": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap threshold"
+          }
+        }
+      }
+    },
+    "Sıkışık": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compr."
+          }
+        }
+      }
+    },
+    "Takas": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swap I/O"
+          }
+        }
+      }
+    },
+    "Takip sorusu sor…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ask a follow-up…"
+          }
+        }
+      }
+    },
+    "Tam": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full"
+          }
+        }
+      }
+    },
+    "Tekrar dene": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retry"
+          }
+        }
+      }
+    },
+    "Temizle": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clear"
+          }
+        }
+      }
+    },
+    "Termal / kernel_task": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thermal / kernel_task"
+          }
+        }
+      }
+    },
+    "Termal baskı": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thermal pressure"
+          }
+        }
+      }
+    },
+    "Termal baskı yok": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No thermal pressure"
+          }
+        }
+      }
+    },
+    "Termal baskı: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thermal pressure: %@"
+          }
+        }
+      }
+    },
+    "Termal durum: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thermal state: %@"
+          }
+        }
+      }
+    },
+    "Test bildirimi gönder": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send test notification"
+          }
+        }
+      }
+    },
+    "Uptime %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uptime %@"
+          }
+        }
+      }
+    },
+    "Uyarıları aç": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enable alerts"
+          }
+        }
+      }
+    },
+    "Uzun uptime": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Long uptime"
+          }
+        }
+      }
+    },
+    "WindowServer belleği şişti": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WindowServer memory has ballooned"
+          }
+        }
+      }
+    },
+    "Yanıt engellendi: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Response blocked: %@"
+          }
+        }
+      }
+    },
+    "Yazışmayı kopyala": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy transcript"
+          }
+        }
+      }
+    },
+    "Yeni analiz": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New analysis"
+          }
+        }
+      }
+    },
+    "Yeniden başlatmak swap'i sıfırlar ve birikmiş bellek sızıntılarını temizler. Tek adımda en büyük kazanç budur.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restarting resets swap and clears accumulated memory leaks. It is the biggest win in a single step."
+          }
+        }
+      }
+    },
+    "Yerel sunucu: sistem verisi bu Mac'ten çıkmaz. Analiz yalnızca butona bastığında gönderilir.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Local server: system data never leaves this Mac. Analysis is sent only when you press the button."
+          }
+        }
+      }
+    },
+    "Yüksek": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "High"
+          }
+        }
+      }
+    },
+    "deşarj": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "discharging"
+          }
+        }
+      }
+    },
+    "dk": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "min"
+          }
+        }
+      }
+    },
+    "gün": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "days"
+          }
+        }
+      }
+    },
+    "kernel_task %%%.0f CPU": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kernel_task %%%.0f CPU"
+          }
+        }
+      }
+    },
+    "kernel_task yükseldi — genelde yoğun disk I/O ya da bellek baskısının belirtisi.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "kernel_task spiked — usually a sign of heavy disk I/O or memory pressure."
+          }
+        }
+      }
+    },
+    "kernel_task yükü sıcaklıktan değil bellek sıkıştırmasından geliyor. Çözüm soğutma değil: RAM boşalt.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The kernel_task load comes from memory compression, not heat. The fix is not cooling: free up RAM."
+          }
+        }
+      }
+    },
+    "macOS bildirim izni vermedi — yedek yol (Script Editor) kullanılıyor": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS denied notification permission — using the fallback path (Script Editor)"
+          }
+        }
+      }
+    },
+    "Çekiş": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Draw"
+          }
+        }
+      }
+    },
+    "Ölçülüyor…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Measuring…"
+          }
+        }
+      }
+    },
+    "Örnek Emülatör": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sample Emulator"
+          }
+        }
+      }
+    },
+    "Örnek Tarayıcı": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sample Browser"
+          }
+        }
+      }
+    },
+    "İkonları göster": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show icons"
+          }
+        }
+      }
+    },
+    "şarj": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "charging"
+          }
+        }
+      }
+    },
+    "≈%.1f çekirdek (toplam %d) · %@ · PID %d": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "≈%.1f cores (of %d) · %@ · PID %d"
+          }
+        }
+      }
+    },
+    "✓ %ld model bulundu": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "✓ %ld models found"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
