@@ -90,6 +90,12 @@ platform :mac do
       output_name: "StatusAppBar",
       clean: true,
       xcargs: "-allowProvisioningUpdates DEVELOPMENT_TEAM=#{TEAM_ID}",
+      # Apple ID oturumu olmadan otomatik imzalama: exportArchive ASC API
+      # anahtarıyla kimlik doğrular (CI deseni); eksik dağıtım sertifikalarını
+      # bu kimlikle oluşturup indirebilir.
+      export_xcargs: "-authenticationKeyPath #{ENV.fetch('APP_STORE_CONNECT_API_KEY_KEY_FILEPATH')} " \
+                     "-authenticationKeyID #{ENV.fetch('APP_STORE_CONNECT_API_KEY_KEY_ID')} " \
+                     "-authenticationKeyIssuerID #{ENV.fetch('APP_STORE_CONNECT_API_KEY_ISSUER_ID')}",
       export_options: {
         teamID: TEAM_ID,
         signingStyle: "automatic"
@@ -128,7 +134,8 @@ platform :mac do
       skip_screenshots: true,
       submit_for_review: false,
       automatic_release: false,
-      force: true
+      force: true,
+      precheck_include_in_app_purchases: false
     )
   end
 
