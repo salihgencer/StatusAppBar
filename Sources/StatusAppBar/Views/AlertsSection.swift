@@ -133,6 +133,16 @@ struct DeepAnalysisSection: View {
                     .font(.system(size: 10))
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
+
+                // Anahtarsız tam tur: sağlayıcıyı demo'ya çekip sohbeti açar.
+                // App Review'ın 2.1(a) "demonstration mode" isteğinin girişi.
+                Button {
+                    settings.aiProviderRaw = AIProvider.demo.rawValue
+                    openChat()
+                } label: {
+                    Label("Demo dene", systemImage: "sparkles")
+                        .font(.system(size: 11))
+                }
             }
 
             if let error = advisor.errorText {

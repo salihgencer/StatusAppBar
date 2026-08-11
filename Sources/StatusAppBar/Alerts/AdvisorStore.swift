@@ -191,6 +191,8 @@ final class AdvisorStore: ObservableObject {
             return OpenAICompatibleClient(baseURL: s.lmstudioURL,
                                           apiKey: nil,
                                           model: s.lmstudioModel, isLocal: true)
+        case .demo:
+            return DemoClient()
         }
     }
 

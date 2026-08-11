@@ -518,6 +518,39 @@
         }
       }
     },
+    "Demo": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demo"
+          }
+        }
+      }
+    },
+    "Demo dene": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try the demo"
+          }
+        }
+      }
+    },
+    "Demo modu: analiz cihaz üzerinde canlı ölçümden üretilir; anahtar veya bağlantı gerektirmez.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Demo mode: the analysis is generated on-device from live measurements; no key or connection needed."
+          }
+        }
+      }
+    },
     "Derin analiz": {
       "extractionState": "manual",
       "localizations": {

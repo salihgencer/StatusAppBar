@@ -154,39 +154,41 @@ private struct AISettingsSection: View {
                     .font(.system(size: 11))
             }
 
-            HStack(spacing: 8) {
-                Button {
-                    validate()
-                } label: {
-                    Label("Doğrula ve modelleri getir", systemImage: "checkmark.shield")
-                        .font(.system(size: 10))
-                }
-                .disabled(isValidating)
+            if !settings.aiProvider.isDemo {
+                HStack(spacing: 8) {
+                    Button {
+                        validate()
+                    } label: {
+                        Label("Doğrula ve modelleri getir", systemImage: "checkmark.shield")
+                            .font(.system(size: 10))
+                    }
+                    .disabled(isValidating)
 
-                if isValidating {
-                    ProgressView().controlSize(.small)
-                }
-            }
-
-            if let message = validationMessage {
-                Text(message)
-                    .font(.system(size: 9))
-                    .foregroundStyle(validationOK ? Theme.power : Theme.cpu)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-
-            if fetchedModels.isEmpty {
-                TextField("Model", text: modelBinding)
-                    .textFieldStyle(.roundedBorder)
-                    .font(.system(size: 11))
-            } else {
-                Picker("Model", selection: modelBinding) {
-                    ForEach(fetchedModels, id: \.self) { model in
-                        Text(model).tag(model)
+                    if isValidating {
+                        ProgressView().controlSize(.small)
                     }
                 }
-                .pickerStyle(.menu)
-                .font(.system(size: 11))
+
+                if let message = validationMessage {
+                    Text(message)
+                        .font(.system(size: 9))
+                        .foregroundStyle(validationOK ? Theme.power : Theme.cpu)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                if fetchedModels.isEmpty {
+                    TextField("Model", text: modelBinding)
+                        .textFieldStyle(.roundedBorder)
+                        .font(.system(size: 11))
+                } else {
+                    Picker("Model", selection: modelBinding) {
+                        ForEach(fetchedModels, id: \.self) { model in
+                            Text(model).tag(model)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .font(.system(size: 11))
+                }
             }
 
             // Dürüst uyarı: anahtar düz metin olarak UserDefaults'ta durur.
@@ -230,10 +232,14 @@ private struct AISettingsSection: View {
         case .openai:    return $settings.openaiModel
         case .ollama:    return $settings.ollamaModel
         case .lmstudio:  return $settings.lmstudioModel
+        case .demo:      return .constant("")
         }
     }
 
     private var privacyNote: String {
+        if settings.aiProvider.isDemo {
+            return String(localized: "Demo modu: analiz cihaz üzerinde canlı ölçümden üretilir; anahtar veya bağlantı gerektirmez.")
+        }
         if settings.aiProvider.isLocal {
             return String(localized: "Yerel sunucu: sistem verisi bu Mac'ten çıkmaz. Analiz yalnızca butona bastığında gönderilir.")
         }

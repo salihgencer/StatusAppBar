@@ -178,12 +178,16 @@ platform :mac do
         content_rights_has_rights: true
       },
       app_review_information: {
-        notes: "Menu bar system monitor. The AI deep-analysis feature is OPTIONAL: " \
-               "the user enters their own API key (Gemini/Claude/OpenAI) or points to " \
-               "their own local server (Ollama/LM Studio). The app is fully functional " \
-               "without it; no demo account is needed. Launch-at-login is a user " \
-               "toggle in Settings (SMAppService, guideline 2.4.5(iii)). The process " \
-               "list intentionally shows only the current user's processes (sandbox)."
+        notes: "Menu bar system monitor; no account is required anywhere. The AI " \
+               "deep-analysis feature includes a built-in DEMO provider that " \
+               "demonstrates the full experience on-device without any API key or " \
+               "account: open the menu bar panel and press 'Try the demo' (or " \
+               "Settings -> Deep analysis (AI) -> Demo). With a real provider the " \
+               "user enters their own API key (Gemini/Claude/OpenAI) or points to " \
+               "their own local server (Ollama/LM Studio); the app is fully " \
+               "functional without it. Launch-at-login is a user toggle in Settings " \
+               "(SMAppService, guideline 2.4.5(iii)). The process list intentionally " \
+               "shows only the current user's processes (sandbox)."
       }
     )
   end

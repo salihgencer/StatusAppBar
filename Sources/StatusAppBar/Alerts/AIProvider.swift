@@ -9,7 +9,7 @@ import Foundation
 /// (`/v1/chat/completions`); tek istemci üçüne de gider. Gemini ve Claude
 /// (Anthropic) kendi API'lerine sahip, ayrı istemcileri var.
 enum AIProvider: String, CaseIterable, Identifiable {
-    case gemini, anthropic, openai, ollama, lmstudio
+    case gemini, anthropic, openai, ollama, lmstudio, demo
 
     var id: String { rawValue }
 
@@ -20,12 +20,15 @@ enum AIProvider: String, CaseIterable, Identifiable {
         case .openai:   return "OpenAI"
         case .ollama:   return "Ollama"
         case .lmstudio: return "LM Studio"
+        case .demo:     return String(localized: "Demo")
         }
     }
 
     /// Yerel sunucularda veri makineden çıkmaz ve API anahtarı gerekmez.
     var isLocal: Bool { self == .ollama || self == .lmstudio }
-    var needsAPIKey: Bool { !isLocal }
+    /// Demo: analiz cihaz üzerinde üretilir; anahtar, bağlantı ve hesap yok.
+    var isDemo: Bool { self == .demo }
+    var needsAPIKey: Bool { !isLocal && !isDemo }
 
     var defaultBaseURL: String {
         switch self {
@@ -34,6 +37,7 @@ enum AIProvider: String, CaseIterable, Identifiable {
         case .ollama:    return "http://localhost:11434"
         case .lmstudio:  return "http://localhost:1234"
         case .gemini:    return "" // Gemini sabit uç nokta kullanır
+        case .demo:      return ""
         }
     }
 
@@ -45,6 +49,7 @@ enum AIProvider: String, CaseIterable, Identifiable {
         case .openai:    return "gpt-4o-mini"
         case .ollama:    return "llama3.1"
         case .lmstudio:  return ""
+        case .demo:      return ""
         }
     }
 }

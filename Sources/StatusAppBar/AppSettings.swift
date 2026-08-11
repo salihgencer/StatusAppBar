@@ -77,6 +77,7 @@ final class AppSettings: ObservableObject {
         case .openai:    return !openaiAPIKey.isEmpty
         case .ollama:    return !ollamaModel.isEmpty
         case .lmstudio:  return true // model boşsa sunucudaki ilk model seçilir
+        case .demo:      return true // anahtar gerektirmez
         }
     }
     #endif
