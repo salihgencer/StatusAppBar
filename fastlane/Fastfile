@@ -68,7 +68,7 @@ platform :mac do
     if Spaceship::ConnectAPI::App.find(bundle_id).nil?
       Spaceship::ConnectAPI::App.create(
         name: "StatusAppBar",
-        version_string: "1.3.0",
+        version_string: "1.4.0",
         sku: "statusappbar",
         primary_locale: "tr-TR",
         bundle_id: bundle_id,
@@ -149,7 +149,7 @@ platform :mac do
     upload_to_app_store(
       api_key: api_key,
       platform: "osx",
-      app_version: "1.3.0",
+      app_version: "1.4.0",
       skip_binary_upload: true,
       skip_screenshots: false,
       overwrite_screenshots: true,
@@ -170,7 +170,7 @@ platform :mac do
     upload_to_app_store(
       api_key: api_key,
       platform: "osx",
-      app_version: "1.3.0",
+      app_version: "1.4.0",
       skip_binary_upload: true,
       skip_metadata: true,
       skip_screenshots: true,

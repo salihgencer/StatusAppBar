@@ -1,1 +1,9 @@
-StatusAppBar ilk sürümüyle App Store'da: canlı menü çubuğu göstergesi, akıllı uyarılar ve Gemini destekli derin analiz.
+v1.4.0 — Büyük güncelleme:
+
+• GPU izleme: Anlık GPU kullanım oranı ve model adı
+• Spike Log: CPU/bellek ani yükselmeleri otomatik kaydeder, sorumlu uygulamayı gösterir
+• Sıcaklık & Fan: SMC sensörlerinden CPU, GPU, pil sıcaklığı ve fan hızları
+• Sağlık Skoru geçmişi: Oturum boyunca performans trendi grafiği
+• Disk Analizi: Herhangi bir klasörü tarayıp en büyük dosya/dizinleri gösterir
+• Dışa Aktarma: Anlık metrikleri CSV veya JSON olarak kaydedin
+• Haftalık AI Raporu: Spike desenleri ve performans trendlerini AI ile analiz edin
