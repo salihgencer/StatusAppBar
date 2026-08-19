@@ -211,29 +211,32 @@ private struct AISettingsSection: View {
     // MARK: - Sağlayıcıya göre alan bağlantıları
 
     private var keyBinding: Binding<String> {
+        let s = Bindable(settings)
         switch settings.aiProvider {
-        case .gemini:    return $settings.geminiAPIKey
-        case .anthropic: return $settings.anthropicAPIKey
-        case .openai:    return $settings.openaiAPIKey
+        case .gemini:    return s.geminiAPIKey
+        case .anthropic: return s.anthropicAPIKey
+        case .openai:    return s.openaiAPIKey
         default:         return .constant("")
         }
     }
 
     private var urlBinding: Binding<String> {
+        let s = Bindable(settings)
         switch settings.aiProvider {
-        case .ollama:    return $settings.ollamaURL
-        case .lmstudio:  return $settings.lmstudioURL
+        case .ollama:    return s.ollamaURL
+        case .lmstudio:  return s.lmstudioURL
         default:         return .constant("")
         }
     }
 
     private var modelBinding: Binding<String> {
+        let s = Bindable(settings)
         switch settings.aiProvider {
-        case .gemini:    return $settings.geminiModel
-        case .anthropic: return $settings.anthropicModel
-        case .openai:    return $settings.openaiModel
-        case .ollama:    return $settings.ollamaModel
-        case .lmstudio:  return $settings.lmstudioModel
+        case .gemini:    return s.geminiModel
+        case .anthropic: return s.anthropicModel
+        case .openai:    return s.openaiModel
+        case .ollama:    return s.ollamaModel
+        case .lmstudio:  return s.lmstudioModel
         case .demo:      return .constant("")
         }
     }
