@@ -21,6 +21,8 @@ final class MetricsManager {
     private(set) var processes = ProcessMetrics()
     private(set) var thermal = ThermalMetrics()
     private(set) var thermalAttribution = ThermalVerdict()
+    private(set) var gpu = GPUMetrics()
+    private(set) var sensors = SensorMetrics()
     private(set) var uptime: TimeInterval = 0
     private(set) var health: Int = 0
 
@@ -28,6 +30,13 @@ final class MetricsManager {
     /// tutuyoruz — Observation framework property-düzeyinde izleme yapar,
     /// dolayısıyla sadece alerts değiştiğinde ilgili view güncellenir.
     private(set) var alerts: [ActiveAlert] = []
+
+    /// Son 24 saatte tespit edilen CPU ve bellek spike'ları (maks 30).
+    private(set) var spikeLog: [SpikeEvent] = []
+
+    /// Health score geçmişi (son 1 saat, her tur bir veri noktası).
+    private(set) var healthHistory: [(date: Date, score: Int)] = []
+    private static let maxHealthHistory = 1800 // 2s aralıkla ~1 saat
 
     let machine: MachineInfo
 
@@ -99,8 +108,26 @@ final class MetricsManager {
         network = s.network
         processes = s.processes
         thermal = s.thermal
+        gpu = s.gpu
+        sensors = s.sensors
         uptime = s.uptime
         health = s.health
+
+        // Health score geçmişi
+        healthHistory.append((date: Date(), score: s.health))
+        if healthHistory.count > Self.maxHealthHistory {
+            healthHistory.removeFirst(healthHistory.count - Self.maxHealthHistory)
+        }
+
+        // Spike log: yeni spike'ları ekle, 24 saatten eskilerini at, maks 30 tut.
+        if !s.spikes.isEmpty {
+            spikeLog.append(contentsOf: s.spikes)
+        }
+        let cutoff = Date().addingTimeInterval(-86400)
+        spikeLog.removeAll { $0.timestamp < cutoff }
+        if spikeLog.count > 30 {
+            spikeLog = Array(spikeLog.suffix(30))
+        }
 
         let snapshot = AlertEngine.Snapshot(
             cpu: s.cpu, memory: s.memory, power: s.power, thermal: s.thermal,
@@ -200,6 +227,11 @@ extension MetricsManager {
         procs.topMemory = procs.topCPU
         procs.sampledAt = Date()
         m.processes = procs
+
+        var gpu = GPUMetrics()
+        gpu.utilization = cpuTotal > 0.9 ? 0.72 : 0.15
+        gpu.name = "Apple M1 Pro"
+        m.gpu = gpu
 
         m.uptime = 187_200
         m.health = HealthScore.compute(cpu: cpu, memory: mem, disk: disk,

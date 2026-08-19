@@ -72,4 +72,15 @@ enum Fmt {
         guard minutes >= 0 else { return "—" }
         return String(format: "%d:%02d", minutes / 60, minutes % 60)
     }
+
+    /// Geçmiş tarih -> "3dk önce", "1sa önce" gibi göreceli zaman.
+    static func relativeTime(_ date: Date) -> String {
+        let seconds = Int(Date().timeIntervalSince(date))
+        if seconds < 60 { return String(localized: "az önce") }
+        let minutes = seconds / 60
+        if minutes < 60 { return String(localized: "\(minutes)dk önce") }
+        let hours = minutes / 60
+        if hours < 24 { return String(localized: "\(hours)sa önce") }
+        return String(localized: "\(hours / 24)g önce") 
+    }
 }

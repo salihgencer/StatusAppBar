@@ -84,6 +84,66 @@ nonisolated struct NetworkMetrics {
     var ipAddress: String?
 }
 
+// MARK: - GPU metrikleri
+
+nonisolated struct GPUMetrics {
+    var utilization: Double = 0  // 0...1
+    var name: String = "—"
+}
+
+// MARK: - Sıcaklık sensörleri ve fan
+
+nonisolated struct SensorMetrics {
+    var temperatures: [TemperatureReading] = []
+    var fans: [FanInfo] = []
+}
+
+nonisolated struct TemperatureReading: Identifiable, Sendable {
+    let id = UUID()
+    var label: String
+    var celsius: Double
+
+    var color: String {
+        switch celsius {
+        case ..<50:  return "green"
+        case ..<80:  return "yellow"
+        default:     return "red"
+        }
+    }
+}
+
+nonisolated struct FanInfo: Identifiable, Sendable {
+    let id = UUID()
+    var index: Int
+    var currentRPM: Int
+    var minRPM: Int
+    var maxRPM: Int
+
+    var utilizationFraction: Double {
+        let range = maxRPM - minRPM
+        guard range > 0 else { return 0 }
+        return Double(currentRPM - minRPM) / Double(range)
+    }
+}
+
+// MARK: - Spike kaydı
+
+/// Anlık CPU veya bellek spike'ını tanımlar. Spike Log bu olayları biriktirir.
+nonisolated struct SpikeEvent: Identifiable, Sendable {
+    let id = UUID()
+    var timestamp: Date
+    var kind: Kind
+    var peakValue: Double        // CPU: toplam %, Bellek: usedFraction
+    var culpritName: String      // en çok kaynak yiyen proses
+    var culpritPID: Int32
+    var culpritValue: Double     // prosesin CPU% veya RSS byte
+
+    enum Kind: String, Sendable {
+        case cpu
+        case memory
+    }
+}
+
 // MARK: - Statik makine bilgisi (uptime/health dışında değişmez)
 
 nonisolated struct MachineInfo {

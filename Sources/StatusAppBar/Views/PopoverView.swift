@@ -78,11 +78,20 @@ struct PopoverContent: View {
                 NetworkSection()
             }
 
-            // Isınma nedeni uyarı beklenmeden sürekli görünür — kullanıcı
-            // "neden ısınıyor" sorusunun cevabını burada görür.
-            ThermalSection()
+            HStack(alignment: .top, spacing: 8) {
+                GPUSection()
+                // Isınma nedeni uyarı beklenmeden sürekli görünür — kullanıcı
+                // "neden ısınıyor" sorusunun cevabını burada görür.
+                ThermalSection()
+            }
+
+            SensorSection()
 
             TopProcessesSection()
+
+            SpikeLogSection()
+
+            HealthHistorySection()
 
             #if MAS
             // Derin analiz yalnızca ücretli App Store sürümünde (BuildVariant).
@@ -216,6 +225,8 @@ private struct MemorySection: View {
 
 private struct DiskSection: View {
     @Environment(MetricsManager.self) var metrics
+    @State private var showBreakdown = false
+    @State private var analyzer = DiskAnalyzer()
 
     var body: some View {
         let disk = metrics.disk
@@ -231,11 +242,82 @@ private struct DiskSection: View {
             }
             InfoRow(label: "Read", value: Fmt.rate(disk.readPerSec))
             InfoRow(label: "Write", value: Fmt.rate(disk.writePerSec))
+
+            Button {
+                let panel = NSOpenPanel()
+                panel.canChooseDirectories = true
+                panel.canChooseFiles = false
+                panel.allowsMultipleSelection = false
+                if panel.runModal() == .OK, let url = panel.url {
+                    analyzer.scan(url: url)
+                    showBreakdown = true
+                }
+            } label: {
+                Label(String(localized: "Klasör Analizi"), systemImage: "folder.badge.gearshape")
+                    .font(.system(size: 10))
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(.secondary)
+            .padding(.top, 2)
+
+            if showBreakdown {
+                DiskBreakdownView(analyzer: analyzer)
+            }
         }
     }
 
     private func shortName(_ name: String) -> String {
         name.count > 7 ? String(name.prefix(7)) : name
+    }
+}
+
+/// Klasör analizi sonuçlarını gösteren inline bölüm.
+private struct DiskBreakdownView: View {
+    var analyzer: DiskAnalyzer
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            if analyzer.isScanning {
+                HStack(spacing: 6) {
+                    ProgressView().controlSize(.small)
+                    Text(String(localized: "Taranıyor..."))
+                        .font(.system(size: 10))
+                        .foregroundStyle(.secondary)
+                }
+            } else if !analyzer.entries.isEmpty {
+                if let path = analyzer.scannedPath {
+                    Text(path.lastPathComponent)
+                        .font(.system(size: 10, weight: .medium))
+                    Text(Fmt.bytes(analyzer.totalSize))
+                        .font(.system(size: 9))
+                        .foregroundStyle(.secondary)
+                }
+
+                ForEach(analyzer.entries.prefix(10)) { entry in
+                    HStack(spacing: 6) {
+                        Image(systemName: entry.isDirectory ? "folder.fill" : "doc.fill")
+                            .font(.system(size: 9))
+                            .foregroundStyle(entry.isDirectory ? Theme.disk : .secondary)
+                        Text(entry.name)
+                            .font(.system(size: 10))
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                        Spacer()
+                        Text(entry.sizeText)
+                            .font(.system(size: 9))
+                            .monospacedDigit()
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                if analyzer.entries.count > 10 {
+                    Text(String(localized: "+\(analyzer.entries.count - 10) daha"))
+                        .font(.system(size: 9))
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .padding(.top, 4)
     }
 }
 
@@ -348,13 +430,164 @@ private struct ThermalSection: View {
     }
 }
 
+// MARK: - Sensors (Sıcaklık + Fan)
+
+/// SMC sensörleri ve fan hızları. Sandbox'ta SMC erişimi engellenir;
+/// bu durumda bölüm boş olur ve gizlenir.
+private struct SensorSection: View {
+    @Environment(MetricsManager.self) var metrics
+
+    var body: some View {
+        let s = metrics.sensors
+        if !s.temperatures.isEmpty || !s.fans.isEmpty {
+            SectionCard(icon: "thermometer.medium", title: String(localized: "Sensörler"), accent: Theme.disk) {
+                if !s.temperatures.isEmpty {
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 3) {
+                        ForEach(s.temperatures) { temp in
+                            HStack(spacing: 4) {
+                                Circle()
+                                    .fill(sensorColor(temp.celsius))
+                                    .frame(width: 6, height: 6)
+                                Text(temp.label)
+                                    .font(.system(size: 9))
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                                Spacer()
+                                Text(String(format: "%.0f°C", temp.celsius))
+                                    .font(.system(size: 9))
+                                    .monospacedDigit()
+                            }
+                        }
+                    }
+                }
+                if !s.fans.isEmpty {
+                    Divider().padding(.vertical, 2)
+                    ForEach(s.fans) { fan in
+                        MetricRow(
+                            label: "Fan \(fan.index + 1)",
+                            value: "\(fan.currentRPM) RPM",
+                            fraction: fan.utilizationFraction, color: Theme.disk
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private func sensorColor(_ celsius: Double) -> Color {
+        switch celsius {
+        case ..<50:  return Theme.power
+        case ..<80:  return Theme.disk
+        default:     return Theme.cpu
+        }
+    }
+}
+
+// MARK: - GPU
+
+private struct GPUSection: View {
+    @Environment(MetricsManager.self) var metrics
+
+    var body: some View {
+        let gpu = metrics.gpu
+        SectionCard(icon: "rectangle.3.group", title: "GPU", accent: Theme.memory) {
+            MetricRow(label: String(localized: "Kullanım"),
+                      value: Fmt.percent(gpu.utilization),
+                      fraction: gpu.utilization, color: nil)
+            InfoRow(label: String(localized: "Model"), value: gpu.name)
+        }
+    }
+}
+
+// MARK: - Spike Log
+
+private struct SpikeLogSection: View {
+    @Environment(MetricsManager.self) var metrics
+
+    var body: some View {
+        if !metrics.spikeLog.isEmpty {
+            SectionCard(icon: "chart.line.uptrend.xyaxis", title: "Spike Log", accent: Theme.cpu) {
+                ForEach(metrics.spikeLog.suffix(5).reversed()) { spike in
+                    HStack(spacing: 6) {
+                        Image(systemName: spike.kind == .cpu ? "cpu" : "memorychip")
+                            .font(.system(size: 9))
+                            .foregroundStyle(spike.kind == .cpu ? Theme.cpu : Theme.memory)
+                        Text(spike.culpritName)
+                            .font(.system(size: 10, weight: .medium))
+                            .lineLimit(1)
+                        Spacer()
+                        Text(Fmt.percent(spike.peakValue))
+                            .font(.system(size: 10))
+                            .monospacedDigit()
+                        Text(Fmt.relativeTime(spike.timestamp))
+                            .font(.system(size: 9))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                if metrics.spikeLog.count > 5 {
+                    Text(String(localized: "+\(metrics.spikeLog.count - 5) daha"))
+                        .font(.system(size: 9))
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Health History
+
+private struct HealthHistorySection: View {
+    @Environment(MetricsManager.self) var metrics
+
+    var body: some View {
+        if metrics.healthHistory.count > 2 {
+            SectionCard(icon: "heart.text.square", title: String(localized: "Sağlık Geçmişi"), accent: Theme.power) {
+                HealthSparkline(data: metrics.healthHistory.map(\.score))
+                    .frame(height: 40)
+                HStack {
+                    Text(String(localized: "Min: \(metrics.healthHistory.map(\.score).min() ?? 0)"))
+                    Spacer()
+                    Text(String(localized: "Maks: \(metrics.healthHistory.map(\.score).max() ?? 100)"))
+                }
+                .font(.system(size: 9))
+                .foregroundStyle(.secondary)
+            }
+        }
+    }
+}
+
+/// Basit sparkline çizgisi — health score geçmişini görselleştirir.
+private struct HealthSparkline: View {
+    let data: [Int]
+
+    var body: some View {
+        GeometryReader { geo in
+            let minVal = Double(data.min() ?? 0)
+            let maxVal = Double(data.max() ?? 100)
+            let range = max(1, maxVal - minVal)
+            let step = geo.size.width / Double(max(1, data.count - 1))
+
+            Path { path in
+                for (i, score) in data.enumerated() {
+                    let x = Double(i) * step
+                    let y = geo.size.height * (1 - (Double(score) - minVal) / range)
+                    if i == 0 { path.move(to: CGPoint(x: x, y: y)) }
+                    else { path.addLine(to: CGPoint(x: x, y: y)) }
+                }
+            }
+            .stroke(Theme.power, lineWidth: 1.5)
+        }
+    }
+}
+
 // MARK: - Footer & Settings
 
 private struct FooterBar: View {
     @Binding var showSettings: Bool
+    @Environment(MetricsManager.self) var metrics
 
     var body: some View {
-        HStack {
+        HStack(spacing: 12) {
             Button {
                 showSettings.toggle()
             } label: {
@@ -362,6 +595,17 @@ private struct FooterBar: View {
                     .font(.system(size: 11))
             }
             .buttonStyle(.plain)
+            .foregroundStyle(.secondary)
+
+            Menu {
+                Button("CSV") { Exporter.export(metrics: metrics, format: .csv) }
+                Button("JSON") { Exporter.export(metrics: metrics, format: .json) }
+            } label: {
+                Label(String(localized: "Dışa Aktar"), systemImage: "square.and.arrow.up")
+                    .font(.system(size: 11))
+            }
+            .menuStyle(.borderlessButton)
+            .frame(width: 90)
             .foregroundStyle(.secondary)
 
             Spacer()
