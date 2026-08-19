@@ -100,12 +100,12 @@ final class Notifier: NSObject, UNUserNotificationCenterDelegate {
     /// hiçbir yere gitmiyor, yani tam da sorunu araştırmak istediğimiz
     /// senaryoda log kayboluyor.
     nonisolated static func log(_ message: String) {
-        let line = "[\(Date().formatted(date: .omitted, time: .standard))] \(message)\n"
-        FileHandle.standardError.write(Data("[Notifier] \(line)".utf8))
+        Log.notify.info("\(message)")
 
         let dir = FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent("Library/Logs", isDirectory: true)
         let url = dir.appendingPathComponent("StatusAppBar.log")
+        let line = "[\(Date().formatted(date: .omitted, time: .standard))] \(message)\n"
         guard let data = line.data(using: .utf8) else { return }
 
         if let handle = try? FileHandle(forWritingTo: url) {

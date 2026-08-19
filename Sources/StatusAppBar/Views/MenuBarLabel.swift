@@ -17,8 +17,8 @@ import SwiftUI
 ///    uygulamalarından biri hâline geliyordu. Artık çizilen içerik gerçekten
 ///    değişmedikçe önbellekten dönüyor.
 struct MenuBarLabel: View {
-    @ObservedObject var metrics: MetricsManager
-    @ObservedObject var settings: AppSettings
+    var metrics: MetricsManager
+    var settings: AppSettings
 
     var body: some View {
         if let image = MenuBarLabelRenderer.shared.image(for: descriptor()) {

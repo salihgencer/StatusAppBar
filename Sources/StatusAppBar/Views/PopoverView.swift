@@ -54,8 +54,8 @@ private struct ContentHeightKey: PreferenceKey {
 /// sıfır ölçülür. README görsellerini üreten `--make-docs` bu yüzden doğrudan
 /// `PopoverContent`'i render eder.
 struct PopoverContent: View {
-    @EnvironmentObject var metrics: MetricsManager
-    @EnvironmentObject var settings: AppSettings
+    @Environment(MetricsManager.self) var metrics
+    @Environment(AppSettings.self) var settings
     @State private var showSettings = false
 
     var body: some View {
@@ -106,7 +106,7 @@ struct PopoverContent: View {
 // MARK: - Header
 
 private struct HeaderSection: View {
-    @EnvironmentObject var metrics: MetricsManager
+    @Environment(MetricsManager.self) var metrics
 
     var body: some View {
         let m = metrics.machine
@@ -149,7 +149,7 @@ private struct HeaderSection: View {
 // MARK: - CPU
 
 private struct CPUSection: View {
-    @EnvironmentObject var metrics: MetricsManager
+    @Environment(MetricsManager.self) var metrics
 
     var body: some View {
         let cpu = metrics.cpu
@@ -187,7 +187,7 @@ private struct CPUSection: View {
 // MARK: - Memory
 
 private struct MemorySection: View {
-    @EnvironmentObject var metrics: MetricsManager
+    @Environment(MetricsManager.self) var metrics
 
     var body: some View {
         let mem = metrics.memory
@@ -215,7 +215,7 @@ private struct MemorySection: View {
 // MARK: - Disk
 
 private struct DiskSection: View {
-    @EnvironmentObject var metrics: MetricsManager
+    @Environment(MetricsManager.self) var metrics
 
     var body: some View {
         let disk = metrics.disk
@@ -242,7 +242,7 @@ private struct DiskSection: View {
 // MARK: - Power
 
 private struct PowerSection: View {
-    @EnvironmentObject var metrics: MetricsManager
+    @Environment(MetricsManager.self) var metrics
 
     var body: some View {
         let p = metrics.power
@@ -292,7 +292,7 @@ private struct PowerSection: View {
 // MARK: - Network
 
 private struct NetworkSection: View {
-    @EnvironmentObject var metrics: MetricsManager
+    @Environment(MetricsManager.self) var metrics
 
     // Bar dolulukları için yumuşak referans tavan (12.5 MB/s ~ 100 Mbit).
     private let cap: Double = 12.5 * 1024 * 1024
@@ -314,7 +314,7 @@ private struct NetworkSection: View {
 /// Termal durum + ısınmanın olası nedeni. Karar cümlesi `ThermalAttribution`
 /// motorundan gelir; nominal durumdayken neden aranmaz, "baskı yok" denir.
 private struct ThermalSection: View {
-    @EnvironmentObject var metrics: MetricsManager
+    @Environment(MetricsManager.self) var metrics
 
     var body: some View {
         let t = metrics.thermal
@@ -379,10 +379,11 @@ private struct FooterBar: View {
 }
 
 private struct SettingsSection: View {
-    @EnvironmentObject var settings: AppSettings
-    @EnvironmentObject var metrics: MetricsManager
+    @Environment(AppSettings.self) var settings
+    @Environment(MetricsManager.self) var metrics
 
     var body: some View {
+        @Bindable var settings = settings
         VStack(alignment: .leading, spacing: 4) {
             Text("Menu bar'da göster")
                 .font(.system(size: 10))
@@ -400,8 +401,6 @@ private struct SettingsSection: View {
                 .toggleStyle(.checkbox)
                 .font(.system(size: 11))
 
-            // Çentikli MacBook'ta menu bar dolunca geniş etiket görünmez oluyor.
-            // "Otomatik" sakinken tek nokta gösterip yer sorununu ortadan kaldırır.
             HStack(spacing: 6) {
                 Text("Genişlik")
                     .font(.system(size: 11))

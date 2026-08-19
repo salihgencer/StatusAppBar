@@ -4,8 +4,8 @@
 #if MAS
 
 import AppKit
-import Combine
 import Foundation
+import Observation
 
 /// "Derin analiz" sohbetini tutar.
 ///
@@ -17,7 +17,8 @@ import Foundation
 /// isterse (`AITool`) araç yerelde çalıştırılır, sonucu geri gönderilir ve
 /// model devam eder — mini bir agent döngüsü.
 @MainActor
-final class AdvisorStore: ObservableObject {
+@Observable
+final class AdvisorStore {
 
     static let shared = AdvisorStore()
 
@@ -33,20 +34,20 @@ final class AdvisorStore: ObservableObject {
     /// kontrolsüz API maliyeti üretir.
     private static let maxToolTurns = 6
 
-    @Published private(set) var messages: [ChatMessage] = []
-    @Published private(set) var isRunning = false
-    @Published private(set) var errorText: String?
-    @Published private(set) var startedAt: Date?
+    private(set) var messages: [ChatMessage] = []
+    private(set) var isRunning = false
+    private(set) var errorText: String?
+    private(set) var startedAt: Date?
 
     /// Akış halindeki yanıtın şu ana kadar gelen kısmı. Tamamlanınca
     /// `messages`'a taşınır; her parça için diziyi güncellemek SwiftUI
     /// kimliklerini (ve kaydırma konumunu) bozardı.
-    @Published private(set) var streamingText = ""
+    private(set) var streamingText = ""
 
     /// Araçları çalıştıran taraf. Onay kartı UI'ı `pendingKill`'i buradan okur.
     let executor = AIToolExecutor()
 
-    private var task: Task<Void, Never>?
+    @ObservationIgnored private var task: Task<Void, Never>?
 
     var hasConversation: Bool { !messages.isEmpty }
 

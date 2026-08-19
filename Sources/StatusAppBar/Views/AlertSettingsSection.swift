@@ -3,9 +3,10 @@ import SwiftUI
 
 /// Uyarı eşikleri ve derin analiz ayarları.
 struct AlertSettingsSection: View {
-    @EnvironmentObject var settings: AppSettings
+    @Environment(AppSettings.self) var settings
 
     var body: some View {
+        @Bindable var settings = settings
         VStack(alignment: .leading, spacing: 6) {
             Toggle("Uyarıları aç", isOn: $settings.alertsEnabled)
                 .toggleStyle(.checkbox)
@@ -121,7 +122,7 @@ private struct ThresholdRow: View {
 /// geçerlidir — ayrı bir doğrulama uç noktası gerektirmez ve kullanıcı
 /// modelini hazır listeden seçer.
 private struct AISettingsSection: View {
-    @EnvironmentObject var settings: AppSettings
+    @Environment(AppSettings.self) var settings
 
     @State private var isValidating = false
     @State private var validationMessage: String?
@@ -129,6 +130,7 @@ private struct AISettingsSection: View {
     @State private var fetchedModels: [String] = []
 
     var body: some View {
+        @Bindable var settings = settings
         VStack(alignment: .leading, spacing: 6) {
             Text("Derin analiz (AI)")
                 .font(.system(size: 10))

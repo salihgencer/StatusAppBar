@@ -4,7 +4,7 @@ import SwiftUI
 /// Aktif uyarılar + suçlu proses + tek tıklık aksiyonlar.
 /// Uyarı yoksa hiç çizilmez — sakin durumda panel şişmesin.
 struct AlertsSection: View {
-    @EnvironmentObject var metrics: MetricsManager
+    @Environment(MetricsManager.self) var metrics
 
     var body: some View {
         if !metrics.alerts.isEmpty {
@@ -92,9 +92,9 @@ private struct AlertCard: View {
 /// Gemini ile teşhis. Sadece kullanıcı bastığında çalışır; arka planda
 /// periyodik istek yok. Yalnızca ücretli MAS sürümünde derlenir (BuildVariant).
 struct DeepAnalysisSection: View {
-    @EnvironmentObject var metrics: MetricsManager
-    @EnvironmentObject var settings: AppSettings
-    @ObservedObject private var advisor = AdvisorStore.shared
+    @Environment(MetricsManager.self) var metrics
+    @Environment(AppSettings.self) var settings
+    private var advisor: AdvisorStore { AdvisorStore.shared }
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
@@ -181,7 +181,7 @@ struct DeepAnalysisSection: View {
 // MARK: - En çok tüketen prosesler
 
 struct TopProcessesSection: View {
-    @EnvironmentObject var metrics: MetricsManager
+    @Environment(MetricsManager.self) var metrics
 
     var body: some View {
         let procs = metrics.processes

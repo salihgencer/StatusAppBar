@@ -14,9 +14,9 @@ import SwiftUI
 /// yeniden boyutlandırılabilir bir pencere.
 struct DeepAnalysisWindow: View {
 
-    @ObservedObject private var advisor = AdvisorStore.shared
-    @ObservedObject private var settings = AppSettings.shared
-    @EnvironmentObject var metrics: MetricsManager
+    private var advisor: AdvisorStore { AdvisorStore.shared }
+    private var settings: AppSettings { AppSettings.shared }
+    @Environment(MetricsManager.self) var metrics
 
     @State private var draft = ""
     @FocusState private var inputFocused: Bool

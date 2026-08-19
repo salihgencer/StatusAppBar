@@ -3,6 +3,7 @@
 
 import AppKit
 import Foundation
+import Observation
 
 /// Modelin istediği araçları yerelde çalıştırır.
 ///
@@ -11,17 +12,18 @@ import Foundation
 /// demelidir. Model metniyle gelen talimat ne olursa olsun (prompt injection
 /// dahil) bu onay atlanamaz: onay UI'da, kodda, burada.
 @MainActor
-final class AIToolExecutor: ObservableObject {
+@Observable
+final class AIToolExecutor {
 
     /// Taze anlık görüntü sağlayıcılar — DeepAnalysisWindow açılışta bağlar.
     /// Sohbet başlangıcındaki rapor eskir; araçlar GÜNCEL veriyi buradan alır.
-    var snapshotProvider: (() -> AlertEngine.Snapshot)?
-    var alertsProvider: (() -> [ActiveAlert])?
+    @ObservationIgnored var snapshotProvider: (() -> AlertEngine.Snapshot)?
+    @ObservationIgnored var alertsProvider: (() -> [ActiveAlert])?
 
     /// Kullanıcı onayı bekleyen sonlandırma isteği (UI bunu gösterir).
-    @Published private(set) var pendingKill: (pid: Int32, name: String)?
+    private(set) var pendingKill: (pid: Int32, name: String)?
 
-    private var killContinuation: CheckedContinuation<Bool, Never>?
+    @ObservationIgnored private var killContinuation: CheckedContinuation<Bool, Never>?
 
     // MARK: - Yürütme
 

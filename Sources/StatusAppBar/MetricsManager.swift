@@ -1,8 +1,7 @@
-import Combine
 import Foundation
+import Observation
 
-/// Örneklemeyi sürer ve sonuçları `@Published` olarak yayınlar. SwiftUI
-/// view'lar bu nesneyi izler.
+/// Örneklemeyi sürer ve sonuçları yayınlar. SwiftUI view'lar bu nesneyi izler.
 ///
 /// Bu sınıf `@MainActor` (paket genelinde varsayılan izolasyon). Örnekleme
 /// UI'yi bloklamasın diye `Sampler` aktöründe yapılır; buraya yalnızca değer
@@ -11,35 +10,36 @@ import Foundation
 /// Uyarı değerlendirmesi bilinçli olarak MAIN ACTOR'de kalır: AppSettings
 /// okur ve bildirim tetikler. Değerlendirme birkaç karşılaştırmadan ibaret,
 /// main thread'i meşgul etmez.
-final class MetricsManager: ObservableObject {
+@Observable
+final class MetricsManager {
 
-    @Published private(set) var cpu = CPUMetrics()
-    @Published private(set) var memory = MemoryMetrics()
-    @Published private(set) var disk = DiskMetrics()
-    @Published private(set) var power = PowerMetrics()
-    @Published private(set) var network = NetworkMetrics()
-    @Published private(set) var processes = ProcessMetrics()
-    @Published private(set) var thermal = ThermalMetrics()
-    @Published private(set) var thermalAttribution = ThermalVerdict()
-    @Published private(set) var uptime: TimeInterval = 0
-    @Published private(set) var health: Int = 0
+    private(set) var cpu = CPUMetrics()
+    private(set) var memory = MemoryMetrics()
+    private(set) var disk = DiskMetrics()
+    private(set) var power = PowerMetrics()
+    private(set) var network = NetworkMetrics()
+    private(set) var processes = ProcessMetrics()
+    private(set) var thermal = ThermalMetrics()
+    private(set) var thermalAttribution = ThermalVerdict()
+    private(set) var uptime: TimeInterval = 0
+    private(set) var health: Int = 0
 
-    /// Aktif uyarılar. AlertEngine'i doğrudan @Published yapmak yerine düz
-    /// diziyi yayınlıyoruz — iç içe ObservableObject SwiftUI'da güncellemeyi
-    /// tetiklemez, bu klasik bir tuzak.
-    @Published private(set) var alerts: [ActiveAlert] = []
+    /// Aktif uyarılar. AlertEngine'i doğrudan yayınlamak yerine düz diziyi
+    /// tutuyoruz — Observation framework property-düzeyinde izleme yapar,
+    /// dolayısıyla sadece alerts değiştiğinde ilgili view güncellenir.
+    private(set) var alerts: [ActiveAlert] = []
 
     let machine: MachineInfo
 
-    private let sampler = Sampler()
-    private let alertEngine = AlertEngine()
+    @ObservationIgnored private let sampler = Sampler()
+    @ObservationIgnored private let alertEngine = AlertEngine()
 
-    private var timer: Timer?
+    @ObservationIgnored private var timer: Timer?
 
     /// Süren örnekleme turu. Bir tur (özellikle `ps` çağrısının düştüğü tur)
     /// aralıktan uzun sürerse turlar üst üste binip sonuçları sırasız
     /// yayınlayabilirdi; bu bayrak binmeyi engeller.
-    private var samplingTask: Task<Void, Never>?
+    @ObservationIgnored private var samplingTask: Task<Void, Never>?
 
     init() {
         machine = MachineInfoProvider.current()
@@ -67,24 +67,19 @@ final class MetricsManager: ObservableObject {
     /// Örnekleme aralığını ayarlar / yeniden başlatır.
     func start(interval: TimeInterval) {
         timer?.invalidate()
-        // İlk örneği hemen al (kullanıcı menüyü açar açmaz veri görsün).
         tick()
         let t = Timer(timeInterval: interval, repeats: true) { [weak self] _ in
             // Timer RunLoop.main'e eklendiği için gövde her zaman main
-            // thread'de çalışır; `assumeIsolated` bunu derleyiciye bildirir
-            // (yeni bir Task açmak gereksiz gecikme olurdu).
+            // thread'de çalışır; `assumeIsolated` bunu derleyiciye bildirir.
             MainActor.assumeIsolated {
                 self?.tick()
             }
         }
-        // .common mode: menü/popover açıkken (tracking run loop) de timer çalışsın.
         RunLoop.main.add(t, forMode: .common)
         timer = t
     }
 
     private func tick() {
-        // Önceki tur bitmediyse yenisini başlatma. Aksi halde iki tur aynı
-        // anda aktöre girip sonuçları sırasız yayınlayabilir.
         guard samplingTask == nil else { return }
 
         samplingTask = Task { [weak self] in
@@ -111,8 +106,6 @@ final class MetricsManager: ObservableObject {
             cpu: s.cpu, memory: s.memory, power: s.power, thermal: s.thermal,
             processes: s.processes, uptime: s.uptime, machine: machine
         )
-        // Isınma nedeni çıkarımı uyarı motoruyla aynı anlık veriden beslenir;
-        // popover bölümü, uyarı detayı ve teşhis raporu aynı kararı paylaşır.
         thermalAttribution = ThermalAttribution.attribute(snapshot)
         alerts = alertEngine.evaluate(snapshot, settings: AppSettings.shared)
     }
@@ -191,7 +184,7 @@ extension MetricsManager {
         var net = NetworkMetrics()
         net.downPerSec = 1.2 * 1024 * 1024
         net.upPerSec = 240 * 1024
-        net.ipAddress = "192.168.1.10" // jenerik özel-ağ örneği
+        net.ipAddress = "192.168.1.10"
         m.network = net
 
         var procs = ProcessMetrics()
@@ -199,8 +192,6 @@ extension MetricsManager {
         procs.kernelTaskCPU = cpuTotal > 0.9 ? 31 : 3
         procs.windowServerRSS = 420 * 1024 * 1024
         procs.topCPU = [
-            // Mock adları katalogdan gelir: App Store ekran görüntüleri her
-            // dilde üretiliyor, sahte veri bile lokalize olmalı.
             ProcessRow(pid: 101, name: String(localized: "Örnek Emülatör"), path: "/tmp/emulator",
                        cpu: cpuTotal > 0.9 ? 290 : 22, rss: 3 * gb),
             ProcessRow(pid: 102, name: String(localized: "Örnek Tarayıcı"), path: "/tmp/browser",
@@ -210,8 +201,7 @@ extension MetricsManager {
         procs.sampledAt = Date()
         m.processes = procs
 
-        m.uptime = 187_200 // 2g 4s
-        // Mock görseller sakin bir makine gösterir; termal durum nominal kalır.
+        m.uptime = 187_200
         m.health = HealthScore.compute(cpu: cpu, memory: mem, disk: disk,
                                        power: power, thermal: m.thermal)
 

@@ -1,5 +1,5 @@
-import Combine
 import Foundation
+import Observation
 import ServiceManagement
 
 /// Menu bar'da hangi metriklerin görüneceğini, örnekleme aralığını ve uyarı
@@ -8,63 +8,84 @@ import ServiceManagement
 /// `shared` singleton: MetricsManager arka planda uyarı değerlendirirken
 /// eşiklere erişmek zorunda; iki ayrı örnek olsaydı arayüzden değiştirilen
 /// eşik motora ulaşmazdı.
-final class AppSettings: ObservableObject {
+@Observable
+final class AppSettings {
 
     static let shared = AppSettings()
 
+    // MARK: - UserDefaults yardımcısı
+
+    @ObservationIgnored private let defaults = UserDefaults.standard
+
+    private func save(_ value: Any, _ key: String) {
+        defaults.set(value, forKey: key)
+    }
+
+    private static func bool(_ key: String, default d: Bool) -> Bool {
+        UserDefaults.standard.object(forKey: key) as? Bool ?? d
+    }
+
+    private static func double(_ key: String, default d: Double) -> Double {
+        UserDefaults.standard.object(forKey: key) as? Double ?? d
+    }
+
+    private static func string(_ key: String, default d: String) -> String {
+        UserDefaults.standard.string(forKey: key) ?? d
+    }
+
     // MARK: - Menu bar içeriği
 
-    @Published var showCPU: Bool { didSet { save(showCPU, "showCPU") } }
-    @Published var showRAM: Bool { didSet { save(showRAM, "showRAM") } }
-    @Published var showDisk: Bool { didSet { save(showDisk, "showDisk") } }
-    @Published var showNetwork: Bool { didSet { save(showNetwork, "showNetwork") } }
-    @Published var showIcons: Bool { didSet { save(showIcons, "showIcons") } }
+    var showCPU: Bool { didSet { save(showCPU, "showCPU") } }
+    var showRAM: Bool { didSet { save(showRAM, "showRAM") } }
+    var showDisk: Bool { didSet { save(showDisk, "showDisk") } }
+    var showNetwork: Bool { didSet { save(showNetwork, "showNetwork") } }
+    var showIcons: Bool { didSet { save(showIcons, "showIcons") } }
 
     /// Menu bar etiketinin genişlik davranışı.
-    @Published var menuBarMode: MenuBarMode { didSet { save(menuBarMode.rawValue, "menuBarMode") } }
+    var menuBarMode: MenuBarMode { didSet { save(menuBarMode.rawValue, "menuBarMode") } }
 
     /// Örnekleme aralığı (saniye).
-    @Published var refreshInterval: Double { didSet { save(refreshInterval, "refreshInterval") } }
+    var refreshInterval: Double { didSet { save(refreshInterval, "refreshInterval") } }
 
     // MARK: - Uyarılar
 
-    @Published var alertsEnabled: Bool { didSet { save(alertsEnabled, "alertsEnabled") } }
-    @Published var alertSwap: Bool { didSet { save(alertSwap, "alertSwap") } }
-    @Published var alertCPUHog: Bool { didSet { save(alertCPUHog, "alertCPUHog") } }
-    @Published var alertThermal: Bool { didSet { save(alertThermal, "alertThermal") } }
-    @Published var alertUptime: Bool { didSet { save(alertUptime, "alertUptime") } }
-    @Published var alertBattery: Bool { didSet { save(alertBattery, "alertBattery") } }
+    var alertsEnabled: Bool { didSet { save(alertsEnabled, "alertsEnabled") } }
+    var alertSwap: Bool { didSet { save(alertSwap, "alertSwap") } }
+    var alertCPUHog: Bool { didSet { save(alertCPUHog, "alertCPUHog") } }
+    var alertThermal: Bool { didSet { save(alertThermal, "alertThermal") } }
+    var alertUptime: Bool { didSet { save(alertUptime, "alertUptime") } }
+    var alertBattery: Bool { didSet { save(alertBattery, "alertBattery") } }
 
     /// Swap doluluk eşiği (%). Temizlenme eşiği bunun 15 puan altıdır.
-    @Published var swapWarnPercent: Double { didSet { save(swapWarnPercent, "swapWarnPercent") } }
+    var swapWarnPercent: Double { didSet { save(swapWarnPercent, "swapWarnPercent") } }
     /// Tek proses CPU eşiği (%). 200 = iki çekirdek.
-    @Published var cpuHogPercent: Double { didSet { save(cpuHogPercent, "cpuHogPercent") } }
+    var cpuHogPercent: Double { didSet { save(cpuHogPercent, "cpuHogPercent") } }
     /// Uptime hatırlatma eşiği (gün).
-    @Published var uptimeWarnDays: Double { didSet { save(uptimeWarnDays, "uptimeWarnDays") } }
+    var uptimeWarnDays: Double { didSet { save(uptimeWarnDays, "uptimeWarnDays") } }
     /// Pil deşarj eşiği (watt).
-    @Published var batteryDrainWatts: Double { didSet { save(batteryDrainWatts, "batteryDrainWatts") } }
+    var batteryDrainWatts: Double { didSet { save(batteryDrainWatts, "batteryDrainWatts") } }
     /// Aynı uyarı için iki bildirim arası minimum süre (dakika).
-    @Published var alertCooldownMinutes: Double { didSet { save(alertCooldownMinutes, "alertCooldownMinutes") } }
+    var alertCooldownMinutes: Double { didSet { save(alertCooldownMinutes, "alertCooldownMinutes") } }
     /// Kritik uyarılarda ses. Varsayılan kapalı — sessiz mod istendi.
-    @Published var alertSound: Bool { didSet { save(alertSound, "alertSound") } }
+    var alertSound: Bool { didSet { save(alertSound, "alertSound") } }
 
     // MARK: - Derin analiz (AI) — yalnızca ücretli MAS sürümü
 
     #if MAS
     /// Seçili sağlayıcı (AIProvider rawValue olarak saklanır — UserDefaults
     /// dostu).
-    @Published var aiProviderRaw: String { didSet { save(aiProviderRaw, "aiProvider") } }
+    var aiProviderRaw: String { didSet { save(aiProviderRaw, "aiProvider") } }
 
-    @Published var geminiAPIKey: String { didSet { save(geminiAPIKey, "geminiAPIKey") } }
-    @Published var geminiModel: String { didSet { save(geminiModel, "geminiModel") } }
-    @Published var anthropicAPIKey: String { didSet { save(anthropicAPIKey, "anthropicAPIKey") } }
-    @Published var anthropicModel: String { didSet { save(anthropicModel, "anthropicModel") } }
-    @Published var openaiAPIKey: String { didSet { save(openaiAPIKey, "openaiAPIKey") } }
-    @Published var openaiModel: String { didSet { save(openaiModel, "openaiModel") } }
-    @Published var ollamaURL: String { didSet { save(ollamaURL, "ollamaURL") } }
-    @Published var ollamaModel: String { didSet { save(ollamaModel, "ollamaModel") } }
-    @Published var lmstudioURL: String { didSet { save(lmstudioURL, "lmstudioURL") } }
-    @Published var lmstudioModel: String { didSet { save(lmstudioModel, "lmstudioModel") } }
+    var geminiAPIKey: String { didSet { save(geminiAPIKey, "geminiAPIKey") } }
+    var geminiModel: String { didSet { save(geminiModel, "geminiModel") } }
+    var anthropicAPIKey: String { didSet { save(anthropicAPIKey, "anthropicAPIKey") } }
+    var anthropicModel: String { didSet { save(anthropicModel, "anthropicModel") } }
+    var openaiAPIKey: String { didSet { save(openaiAPIKey, "openaiAPIKey") } }
+    var openaiModel: String { didSet { save(openaiModel, "openaiModel") } }
+    var ollamaURL: String { didSet { save(ollamaURL, "ollamaURL") } }
+    var ollamaModel: String { didSet { save(ollamaModel, "ollamaModel") } }
+    var lmstudioURL: String { didSet { save(lmstudioURL, "lmstudioURL") } }
+    var lmstudioModel: String { didSet { save(lmstudioModel, "lmstudioModel") } }
 
     var aiProvider: AIProvider { AIProvider(rawValue: aiProviderRaw) ?? .gemini }
 
@@ -76,8 +97,8 @@ final class AppSettings: ObservableObject {
         case .anthropic: return !anthropicAPIKey.isEmpty && !anthropicModel.isEmpty
         case .openai:    return !openaiAPIKey.isEmpty
         case .ollama:    return !ollamaModel.isEmpty
-        case .lmstudio:  return true // model boşsa sunucudaki ilk model seçilir
-        case .demo:      return true // anahtar gerektirmez
+        case .lmstudio:  return true
+        case .demo:      return true
         }
     }
     #endif
@@ -86,65 +107,56 @@ final class AppSettings: ObservableObject {
 
     /// Kaynağı sistemdir (SMAppService), UserDefaults değil; kullanıcı System
     /// Settings'ten kapatsa bile tutarlı kalır.
-    @Published var launchAtLogin: Bool {
+    var launchAtLogin: Bool {
         didSet {
             guard !suppressLaunchApply else { return }
             applyLaunchAtLogin()
         }
     }
-    private var suppressLaunchApply = false
+    @ObservationIgnored private var suppressLaunchApply = false
 
     // MARK: - Kurulum
 
     init() {
-        let d = UserDefaults.standard
+        showCPU = Self.bool("showCPU", default: true)
+        showRAM = Self.bool("showRAM", default: true)
+        showDisk = Self.bool("showDisk", default: false)
+        showNetwork = Self.bool("showNetwork", default: false)
+        showIcons = Self.bool("showIcons", default: true)
 
-        showCPU = d.object(forKey: "showCPU") as? Bool ?? true
-        showRAM = d.object(forKey: "showRAM") as? Bool ?? true
-        showDisk = d.object(forKey: "showDisk") as? Bool ?? false
-        showNetwork = d.object(forKey: "showNetwork") as? Bool ?? false
-        showIcons = d.object(forKey: "showIcons") as? Bool ?? true
-
-        // Varsayılan .adaptive: çentikli MacBook'ta menu bar dolunca geniş
-        // etiket çentiğin altına itilip GÖRÜNMEZ oluyor. Dar başlamak
-        // görünürlüğü garantiler; gerektiğinde kendisi genişler.
-        menuBarMode = MenuBarMode(rawValue: d.string(forKey: "menuBarMode") ?? "")
+        menuBarMode = MenuBarMode(rawValue: UserDefaults.standard.string(forKey: "menuBarMode") ?? "")
             ?? .adaptive
 
-        // Varsayılan 2 sn: 1 sn'de bir menu bar etiketini yeniden RENDER etmek
-        // ölçülebilir CPU yakıyordu (izleme aracının kendisi ilk 10 tüketici
-        // arasına giriyordu). 2 sn hiçbir bilgi kaybettirmiyor.
-        refreshInterval = d.object(forKey: "refreshInterval") as? Double ?? 2.0
+        refreshInterval = Self.double("refreshInterval", default: 2.0)
 
-        alertsEnabled = d.object(forKey: "alertsEnabled") as? Bool ?? true
-        alertSwap = d.object(forKey: "alertSwap") as? Bool ?? true
-        alertCPUHog = d.object(forKey: "alertCPUHog") as? Bool ?? true
-        alertThermal = d.object(forKey: "alertThermal") as? Bool ?? true
-        alertUptime = d.object(forKey: "alertUptime") as? Bool ?? true
-        alertBattery = d.object(forKey: "alertBattery") as? Bool ?? true
+        alertsEnabled = Self.bool("alertsEnabled", default: true)
+        alertSwap = Self.bool("alertSwap", default: true)
+        alertCPUHog = Self.bool("alertCPUHog", default: true)
+        alertThermal = Self.bool("alertThermal", default: true)
+        alertUptime = Self.bool("alertUptime", default: true)
+        alertBattery = Self.bool("alertBattery", default: true)
 
-        swapWarnPercent = d.object(forKey: "swapWarnPercent") as? Double ?? 75
-        cpuHogPercent = d.object(forKey: "cpuHogPercent") as? Double ?? 200
-        uptimeWarnDays = d.object(forKey: "uptimeWarnDays") as? Double ?? 7
-        batteryDrainWatts = d.object(forKey: "batteryDrainWatts") as? Double ?? 20
-        alertCooldownMinutes = d.object(forKey: "alertCooldownMinutes") as? Double ?? 30
-        alertSound = d.object(forKey: "alertSound") as? Bool ?? false
+        swapWarnPercent = Self.double("swapWarnPercent", default: 75)
+        cpuHogPercent = Self.double("cpuHogPercent", default: 200)
+        uptimeWarnDays = Self.double("uptimeWarnDays", default: 7)
+        batteryDrainWatts = Self.double("batteryDrainWatts", default: 20)
+        alertCooldownMinutes = Self.double("alertCooldownMinutes", default: 30)
+        alertSound = Self.bool("alertSound", default: false)
 
         #if MAS
-        aiProviderRaw = d.string(forKey: "aiProvider") ?? AIProvider.gemini.rawValue
-        geminiAPIKey = d.string(forKey: "geminiAPIKey") ?? ""
-        geminiModel = d.string(forKey: "geminiModel") ?? AIProvider.gemini.defaultModel
-        anthropicAPIKey = d.string(forKey: "anthropicAPIKey") ?? ""
-        anthropicModel = d.string(forKey: "anthropicModel") ?? AIProvider.anthropic.defaultModel
-        openaiAPIKey = d.string(forKey: "openaiAPIKey") ?? ""
-        openaiModel = d.string(forKey: "openaiModel") ?? AIProvider.openai.defaultModel
-        ollamaURL = d.string(forKey: "ollamaURL") ?? AIProvider.ollama.defaultBaseURL
-        ollamaModel = d.string(forKey: "ollamaModel") ?? AIProvider.ollama.defaultModel
-        lmstudioURL = d.string(forKey: "lmstudioURL") ?? AIProvider.lmstudio.defaultBaseURL
-        lmstudioModel = d.string(forKey: "lmstudioModel") ?? AIProvider.lmstudio.defaultModel
+        aiProviderRaw = Self.string("aiProvider", default: AIProvider.gemini.rawValue)
+        geminiAPIKey = Self.string("geminiAPIKey", default: "")
+        geminiModel = Self.string("geminiModel", default: AIProvider.gemini.defaultModel)
+        anthropicAPIKey = Self.string("anthropicAPIKey", default: "")
+        anthropicModel = Self.string("anthropicModel", default: AIProvider.anthropic.defaultModel)
+        openaiAPIKey = Self.string("openaiAPIKey", default: "")
+        openaiModel = Self.string("openaiModel", default: AIProvider.openai.defaultModel)
+        ollamaURL = Self.string("ollamaURL", default: AIProvider.ollama.defaultBaseURL)
+        ollamaModel = Self.string("ollamaModel", default: AIProvider.ollama.defaultModel)
+        lmstudioURL = Self.string("lmstudioURL", default: AIProvider.lmstudio.defaultBaseURL)
+        lmstudioModel = Self.string("lmstudioModel", default: AIProvider.lmstudio.defaultModel)
         #endif
 
-        // didSet init sırasında tetiklenmez; mevcut sistem durumunu yansıt.
         launchAtLogin = (SMAppService.mainApp.status == .enabled)
     }
 
@@ -183,27 +195,18 @@ final class AppSettings: ObservableObject {
                 }
             }
         } catch {
-            // Bundle dışı çalışma (swift run) veya imza sorununda gerçek duruma dön.
             suppressLaunchApply = true
             launchAtLogin = (SMAppService.mainApp.status == .enabled)
             suppressLaunchApply = false
         }
     }
-
-    private func save(_ value: Any, _ key: String) {
-        UserDefaults.standard.set(value, forKey: key)
-    }
 }
 
 /// Menu bar etiketinin genişlik stratejisi.
 enum MenuBarMode: String, CaseIterable, Identifiable {
-    /// Sadece renkli nokta (~12 px). Hiçbir zaman yer sorunu yaratmaz.
     case minimal
-    /// Nokta + tek en kritik metrik (~46 px).
     case compact
-    /// Seçili tüm metrikler (~110 px+). Çentikli ekranda gizlenme riski var.
     case full
-    /// Sakinken minimal, stres veya uyarı varken compact.
     case adaptive
 
     var id: String { rawValue }
