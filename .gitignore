@@ -23,3 +23,12 @@ xcuserdata/
 
 # macOS
 .DS_Store
+
+# Derleme çıktıları ve yerel dosyalar (2026-10-01)
+*.xcuserstate
+*.dmg
+*.ipa
+*.apk
+*.aab
+*.dSYM.zip
+release-artifacts/
