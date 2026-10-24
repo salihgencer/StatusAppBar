@@ -185,7 +185,11 @@ platform :mac do
         content_rights_has_rights: true
       },
       app_review_information: {
-        notes: "Menu bar system monitor; no account is required anywhere. The AI " \
+        notes: "Build 9 addresses the 26 August 2026 Guideline 2.1(a) rejection: " \
+               "the menu bar panel is one language per locale. Turkish is the " \
+               "source language and English comes from the string catalog. The " \
+               "Turkish and English screenshots were regenerated to match. " \
+               "Menu bar system monitor; no account is required anywhere. The AI " \
                "deep-analysis feature includes a built-in DEMO provider that " \
                "demonstrates the full experience on-device without any API key or " \
                "account: open the menu bar panel and press 'Try the demo' (or " \

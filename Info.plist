@@ -9,7 +9,7 @@
     <key>CFBundleIdentifier</key>
     <string>com.salihgencer.statusappbar</string>
     <key>CFBundleVersion</key>
-    <string>8</string>
+    <string>9</string>
     <key>CFBundleShortVersionString</key>
     <string>1.4.0</string>
     <!-- İkon: hem build.sh (Resources/AppIcon.icns kopyalar) hem Xcode

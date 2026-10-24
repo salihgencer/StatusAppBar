@@ -7,3 +7,4 @@ v1.4.0 — Büyük güncelleme:
 • Disk Analizi: Herhangi bir klasörü tarayıp en büyük dosya/dizinleri gösterir
 • Dışa Aktarma: Anlık metrikleri CSV veya JSON olarak kaydedin
 • Haftalık AI Raporu: Spike desenleri ve performans trendlerini AI ile analiz edin
+• Dil: Menü çubuğu paneli seçilen dile göre tek dilde gösterilir

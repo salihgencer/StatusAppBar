@@ -1,1 +1,10 @@
-StatusAppBar debuts on the App Store: live menu bar indicator, smart alerts, and Gemini-powered deep analysis.
+v1.4.0 — Major update:
+
+• GPU monitoring: live GPU use and the model name
+• Spike log: records sudden CPU and memory spikes and names the app
+• Temperature and fans: CPU, GPU, battery temperature and fan speed
+• Health score history: a performance trend for the session
+• Disk analysis: scan a folder and list the largest files
+• Export: save the current metrics as CSV or JSON
+• Weekly AI report: spike patterns and performance trends
+• Language: the menu bar panel is now one language per locale
