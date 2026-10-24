@@ -21,6 +21,10 @@ let package = Package(
                 // kaynağıydı; arka plan artık yalnızca `Sampler` aktöründe.
                 .enableUpcomingFeature("NonisolatedNonsendingByDefault")
             ]
-        )
+        ),
+        .testTarget(
+            name: "StatusAppBarTests",
+            path: "Tests"
+        ),
     ]
 )

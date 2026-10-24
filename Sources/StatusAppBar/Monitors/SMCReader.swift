@@ -36,13 +36,13 @@ nonisolated final class SMCReader {
     /// Bilinen Apple Silicon sıcaklık sensör anahtarları. Model bazında tümü
     /// mevcut olmayabilir; okunamayan sensörler atlanır.
     static let temperatureKeys: [(key: String, label: String)] = [
-        ("Tp09", "CPU Package"),
-        ("Tp01", "CPU Core 1"),
-        ("Tp05", "CPU Core 2"),
+        ("Tp09", "CPU paketi"),
+        ("Tp01", "CPU çekirdek 1"),
+        ("Tp05", "CPU çekirdek 2"),
         ("Tg05", "GPU"),
-        ("TW0P", "Wireless"),
-        ("Tm02", "Memory"),
-        ("TB0T", "Battery"),
+        ("TW0P", "Kablosuz"),
+        ("Tm02", "Bellek"),
+        ("TB0T", "Pil"),
     ]
 
     struct SensorReading: Sendable {

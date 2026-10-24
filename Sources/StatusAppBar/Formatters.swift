@@ -62,9 +62,9 @@ enum Fmt {
         let days = total / 86_400
         let hours = (total % 86_400) / 3600
         let minutes = (total % 3600) / 60
-        if days > 0 { return "\(days)d \(hours)h" }
-        if hours > 0 { return "\(hours)h \(minutes)m" }
-        return "\(minutes)m"
+        if days > 0 { return String(format: String(localized: "%ldg %ldsa"), days, hours) }
+        if hours > 0 { return String(format: String(localized: "%ldsa %lddk"), hours, minutes) }
+        return String(format: String(localized: "%lddk"), minutes)
     }
 
     /// Dakika cinsinden kalan süre -> "2:35"
@@ -78,9 +78,9 @@ enum Fmt {
         let seconds = Int(Date().timeIntervalSince(date))
         if seconds < 60 { return String(localized: "az önce") }
         let minutes = seconds / 60
-        if minutes < 60 { return String(localized: "\(minutes)dk önce") }
+        if minutes < 60 { return String(format: String(localized: "%ld dk önce"), minutes) }
         let hours = minutes / 60
-        if hours < 24 { return String(localized: "\(hours)sa önce") }
-        return String(localized: "\(hours / 24)g önce") 
+        if hours < 24 { return String(format: String(localized: "%ld sa önce"), hours) }
+        return String(format: String(localized: "%ld g önce"), hours / 24) 
     }
 }

@@ -1,5 +1,11 @@
 import SwiftUI
 
+/// Katalog anahtarı Türkçedir. `Text` bir `String` değişkenini yerelleştirmez;
+/// bölüm başlığı ve satır etiketi bu yüzden buradan geçer.
+func localizedKey(_ key: String) -> String {
+    Bundle.main.localizedString(forKey: key, value: key, table: nil)
+}
+
 /// Doluluk barı: arka plan ray + renkli dolum. Görseldeki blok barların
 /// native karşılığı.
 struct MetricBar: View {
@@ -29,8 +35,8 @@ struct MetricRow: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            Text(label)
-                .frame(width: 52, alignment: .leading)
+            Text(localizedKey(label))
+                .frame(width: 72, alignment: .leading)
                 .foregroundStyle(.secondary)
             MetricBar(fraction: fraction, color: color)
             Text(value)
@@ -49,8 +55,8 @@ struct InfoRow: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            Text(label)
-                .frame(width: 52, alignment: .leading)
+            Text(localizedKey(label))
+                .frame(width: 72, alignment: .leading)
                 .foregroundStyle(.secondary)
             Text(value)
                 .foregroundStyle(valueColor)
@@ -73,7 +79,7 @@ struct SectionCard<Content: View>: View {
             HStack(spacing: 5) {
                 Image(systemName: icon)
                     .foregroundStyle(accent)
-                Text(title)
+                Text(localizedKey(title))
                     .fontWeight(.semibold)
                 Spacer()
             }

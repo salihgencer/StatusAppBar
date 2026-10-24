@@ -9,6 +9,12 @@ options:
   # Kaynak dil Türkçe: koddaki literal'ler katalog anahtarıdır; İngilizce
   # çeviriler Resources/Localizable.xcstrings içinde yaşar.
   developmentLanguage: tr
+  # Katalogdaki `en` bölgesi üretilen projede kalsın. Aksi halde İngilizce
+  # Mac, Türkçe anahtarın yanına katalogsuz İngilizce literal koyar.
+  knownRegions:
+    - tr
+    - en
+    - Base
 targets:
   StatusAppBar:
     type: application

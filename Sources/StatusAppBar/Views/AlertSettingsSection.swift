@@ -31,7 +31,7 @@ struct AlertSettingsSection: View {
                 ThresholdRow(label: String(localized: "CPU eşiği"), unit: "%",
                              value: $settings.cpuHogPercent,
                              range: 100...600, step: 50)
-                ThresholdRow(label: "Uptime", unit: String(localized: "gün"),
+                ThresholdRow(label: "Açık süre", unit: String(localized: "gün"),
                              value: $settings.uptimeWarnDays,
                              range: 1...30, step: 1)
                 ThresholdRow(label: String(localized: "Pil çekişi"), unit: "W",
@@ -102,7 +102,7 @@ private struct ThresholdRow: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            Text(label)
+            Text(localizedKey(label))
                 .frame(width: 78, alignment: .leading)
                 .foregroundStyle(.secondary)
             Stepper(value: $value, in: range, step: step) {

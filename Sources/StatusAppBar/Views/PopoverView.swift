@@ -122,7 +122,7 @@ private struct HeaderSection: View {
         let h = HealthScore.color(for: metrics.health)
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 6) {
-                Text("Status")
+                Text("Durum")
                     .fontWeight(.bold)
                 Circle()
                     .fill(h.isGood ? Theme.power : Theme.cpu)
@@ -130,7 +130,7 @@ private struct HeaderSection: View {
                 Text("\(h.label) · \(metrics.health)")
                     .foregroundStyle(.secondary)
                 Spacer()
-                Text("up \(Fmt.uptime(metrics.uptime))")
+                Text(String(format: String(localized: "açık %@"), Fmt.uptime(metrics.uptime)))
                     .foregroundStyle(.secondary)
             }
             .font(.system(size: 12))
@@ -147,7 +147,7 @@ private struct HeaderSection: View {
     private func machineLine(_ m: MachineInfo) -> String {
         var parts: [String] = []
         if m.chip != "—" { parts.append(m.chip) }
-        parts.append("\(m.coreCount) cores")
+        parts.append(String(format: String(localized: "%ld çekirdek"), m.coreCount))
         parts.append(Fmt.bytes(m.totalRAMBytes))
         if m.refreshRateHz > 0 { parts.append("\(m.refreshRateHz)Hz") }
         parts.append(m.osVersion)
@@ -163,13 +163,13 @@ private struct CPUSection: View {
     var body: some View {
         let cpu = metrics.cpu
         SectionCard(icon: "cpu", title: "CPU", accent: Theme.cpu) {
-            MetricRow(label: "Total", value: Fmt.percent(cpu.total), fraction: cpu.total, color: nil)
+            MetricRow(label: "Toplam", value: Fmt.percent(cpu.total), fraction: cpu.total, color: nil)
 
             if !cpu.cores.isEmpty {
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 3) {
                     ForEach(Array(cpu.cores.enumerated()), id: \.offset) { idx, value in
                         HStack(spacing: 5) {
-                            Text("C\(idx + 1)")
+                            Text(String(format: String(localized: "C%ld"), idx + 1))
                                 .font(.system(size: 9))
                                 .foregroundStyle(.secondary)
                                 .frame(width: 22, alignment: .leading)
@@ -185,7 +185,7 @@ private struct CPUSection: View {
             }
 
             InfoRow(
-                label: "Load",
+                label: "Yük",
                 value: String(format: "%.2f / %.2f / %.2f · %dP+%dE",
                               cpu.load[0], cpu.load[1], cpu.load[2], cpu.pCores, cpu.eCores)
             )
@@ -200,13 +200,13 @@ private struct MemorySection: View {
 
     var body: some View {
         let mem = metrics.memory
-        SectionCard(icon: "memorychip", title: "Memory", accent: Theme.memory) {
-            MetricRow(label: "Used", value: Fmt.percent(mem.usedFraction),
+        SectionCard(icon: "memorychip", title: "Bellek", accent: Theme.memory) {
+            MetricRow(label: "Kullanılan", value: Fmt.percent(mem.usedFraction),
                       fraction: mem.usedFraction, color: nil)
-            MetricRow(label: "Swap", value: Fmt.percent(mem.swapFraction),
+            MetricRow(label: "Takas %", value: Fmt.percent(mem.swapFraction),
                       fraction: mem.swapFraction, color: nil)
-            InfoRow(label: "Total", value: "\(Fmt.bytes(mem.used)) / \(Fmt.bytes(mem.total))")
-            InfoRow(label: "Free", value: Fmt.bytes(mem.free))
+            InfoRow(label: "Toplam", value: "\(Fmt.bytes(mem.used)) / \(Fmt.bytes(mem.total))")
+            InfoRow(label: "Boş", value: Fmt.bytes(mem.free))
             InfoRow(label: String(localized: "Sıkışık"), value: Fmt.bytes(mem.compressed))
             // Swap trafiği yalnızca gerçekten akış varken gösterilir; sıfır
             // satırı her zaman durmak paneli gereksiz doldurur.
@@ -232,16 +232,16 @@ private struct DiskSection: View {
         let disk = metrics.disk
         SectionCard(icon: "internaldrive", title: "Disk", accent: Theme.disk) {
             if disk.volumes.isEmpty {
-                Text("No data").font(.system(size: 11)).foregroundStyle(.secondary)
+                Text("Veri yok").font(.system(size: 11)).foregroundStyle(.secondary)
             } else {
                 ForEach(disk.volumes.prefix(3)) { vol in
                     MetricRow(label: shortName(vol.name),
-                              value: "\(Fmt.bytes(vol.free)) free",
+                              value: String(format: String(localized: "%@ boş"), Fmt.bytes(vol.free)),
                               fraction: vol.fraction, color: nil)
                 }
             }
-            InfoRow(label: "Read", value: Fmt.rate(disk.readPerSec))
-            InfoRow(label: "Write", value: Fmt.rate(disk.writePerSec))
+            InfoRow(label: "Okuma", value: Fmt.rate(disk.readPerSec))
+            InfoRow(label: "Yazma", value: Fmt.rate(disk.writePerSec))
 
             Button {
                 let panel = NSOpenPanel()
@@ -311,7 +311,7 @@ private struct DiskBreakdownView: View {
                 }
 
                 if analyzer.entries.count > 10 {
-                    Text(String(localized: "+\(analyzer.entries.count - 10) daha"))
+                    Text(String(format: String(localized: "+%ld daha"), analyzer.entries.count - 10))
                         .font(.system(size: 9))
                         .foregroundStyle(.secondary)
                 }
@@ -328,11 +328,13 @@ private struct PowerSection: View {
 
     var body: some View {
         let p = metrics.power
-        SectionCard(icon: "bolt.fill", title: "Power", accent: Theme.power) {
+        SectionCard(icon: "bolt.fill", title: "Güç", accent: Theme.power) {
             if p.hasBattery {
-                MetricRow(label: "Level", value: Fmt.percent(p.level, decimals: 0),
+                MetricRow(label: "Seviye", value: Fmt.percent(p.level, decimals: 0),
                           fraction: p.level, color: Theme.power)
-                InfoRow(label: "Input", value: p.adapterWatts > 0 ? "\(p.adapterWatts)W max" : "—")
+                InfoRow(label: "Giriş", value: p.adapterWatts > 0
+                        ? String(format: String(localized: "%ldW en fazla"), p.adapterWatts)
+                        : "—")
                 // Anlık güç: "pil hızlı bitiyor" hissini doğrulayan tek sayı.
                 // Boştaki bir MacBook 3-8 W çeker; 20 W üstü arka planda ağır
                 // bir iş var demektir.
@@ -346,28 +348,34 @@ private struct PowerSection: View {
                         valueColor: (p.isDischarging && p.watts >= 20) ? Theme.cpu : .primary
                     )
                 }
-                InfoRow(label: "Status", value: statusText(p))
+                InfoRow(label: "Durum", value: statusText(p))
                 InfoRow(
-                    label: "Battery",
-                    value: String(format: "%@ · %d cycles · %.1f°C",
+                    label: "Pil",
+                    value: String(format: String(localized: "%@ · %ld döngü · %.1f°C"),
                                   healthLabel(p), p.cycleCount, p.temperature),
                     valueColor: .secondary
                 )
             } else {
-                Text("No battery").font(.system(size: 11)).foregroundStyle(.secondary)
+                Text("Pil yok").font(.system(size: 11)).foregroundStyle(.secondary)
             }
         }
     }
 
     private func statusText(_ p: PowerMetrics) -> String {
-        if p.isCharged { return "Charged" }
-        if p.isCharging { return "Charging · \(Fmt.timeRemaining(p.timeRemainingMinutes))" }
-        if p.onAC { return "On AC" }
-        return "On battery · \(Fmt.timeRemaining(p.timeRemainingMinutes))"
+        if p.isCharged { return String(localized: "Dolu") }
+        if p.isCharging {
+            return String(format: String(localized: "Şarj oluyor · %@"),
+                          Fmt.timeRemaining(p.timeRemainingMinutes))
+        }
+        if p.onAC { return String(localized: "Adaptörde") }
+        return String(format: String(localized: "Pilde · %@"),
+                      Fmt.timeRemaining(p.timeRemainingMinutes))
     }
 
     private func healthLabel(_ p: PowerMetrics) -> String {
-        p.healthPercent >= 80 ? "Healthy" : (p.healthPercent > 0 ? "\(Int(p.healthPercent))%" : "—")
+        p.healthPercent >= 80
+            ? String(localized: "Sağlıklı")
+            : (p.healthPercent > 0 ? "\(Int(p.healthPercent))%" : "—")
     }
 }
 
@@ -381,10 +389,10 @@ private struct NetworkSection: View {
 
     var body: some View {
         let net = metrics.network
-        SectionCard(icon: "antenna.radiowaves.left.and.right", title: "Network", accent: Theme.network) {
-            MetricRow(label: "Down", value: Fmt.rate(net.downPerSec),
+        SectionCard(icon: "antenna.radiowaves.left.and.right", title: "Ağ", accent: Theme.network) {
+            MetricRow(label: "İndirme", value: Fmt.rate(net.downPerSec),
                       fraction: min(1, net.downPerSec / cap), color: Theme.network)
-            MetricRow(label: "Up", value: Fmt.rate(net.upPerSec),
+            MetricRow(label: "Gönderme", value: Fmt.rate(net.upPerSec),
                       fraction: min(1, net.upPerSec / cap), color: Theme.network)
             InfoRow(label: "IP", value: net.ipAddress ?? "—")
         }
@@ -401,7 +409,7 @@ private struct ThermalSection: View {
     var body: some View {
         let t = metrics.thermal
         let a = metrics.thermalAttribution
-        SectionCard(icon: "thermometer.high", title: "Thermal", accent: accent(for: t.severity)) {
+        SectionCard(icon: "thermometer.high", title: "Isı", accent: accent(for: t.severity)) {
             InfoRow(label: String(localized: "Durum"), value: t.label,
                     valueColor: accent(for: t.severity))
             InfoRow(
@@ -448,7 +456,7 @@ private struct SensorSection: View {
                                 Circle()
                                     .fill(sensorColor(temp.celsius))
                                     .frame(width: 6, height: 6)
-                                Text(temp.label)
+                                Text(localizedKey(temp.label))
                                     .font(.system(size: 9))
                                     .foregroundStyle(.secondary)
                                     .lineLimit(1)
@@ -464,8 +472,8 @@ private struct SensorSection: View {
                     Divider().padding(.vertical, 2)
                     ForEach(s.fans) { fan in
                         MetricRow(
-                            label: "Fan \(fan.index + 1)",
-                            value: "\(fan.currentRPM) RPM",
+                            label: String(format: String(localized: "Fan %ld"), fan.index + 1),
+                            value: String(format: String(localized: "%ld RPM"), fan.currentRPM),
                             fraction: fan.utilizationFraction, color: Theme.disk
                         )
                     }
@@ -506,7 +514,7 @@ private struct SpikeLogSection: View {
 
     var body: some View {
         if !metrics.spikeLog.isEmpty {
-            SectionCard(icon: "chart.line.uptrend.xyaxis", title: "Spike Log", accent: Theme.cpu) {
+            SectionCard(icon: "chart.line.uptrend.xyaxis", title: "Ani yükselişler", accent: Theme.cpu) {
                 ForEach(metrics.spikeLog.suffix(5).reversed()) { spike in
                     HStack(spacing: 6) {
                         Image(systemName: spike.kind == .cpu ? "cpu" : "memorychip")
@@ -525,7 +533,7 @@ private struct SpikeLogSection: View {
                     }
                 }
                 if metrics.spikeLog.count > 5 {
-                    Text(String(localized: "+\(metrics.spikeLog.count - 5) daha"))
+                    Text(String(format: String(localized: "+%ld daha"), metrics.spikeLog.count - 5))
                         .font(.system(size: 9))
                         .foregroundStyle(.secondary)
                 }
@@ -545,9 +553,9 @@ private struct HealthHistorySection: View {
                 HealthSparkline(data: metrics.healthHistory.map(\.score))
                     .frame(height: 40)
                 HStack {
-                    Text(String(localized: "Min: \(metrics.healthHistory.map(\.score).min() ?? 0)"))
+                    Text(String(format: String(localized: "Min: %ld"), metrics.healthHistory.map(\.score).min() ?? 0))
                     Spacer()
-                    Text(String(localized: "Maks: \(metrics.healthHistory.map(\.score).max() ?? 100)"))
+                    Text(String(format: String(localized: "Maks: %ld"), metrics.healthHistory.map(\.score).max() ?? 100))
                 }
                 .font(.system(size: 9))
                 .foregroundStyle(.secondary)
@@ -591,7 +599,7 @@ private struct FooterBar: View {
             Button {
                 showSettings.toggle()
             } label: {
-                Label("Settings", systemImage: "gearshape")
+                Label("Ayarlar", systemImage: "gearshape")
                     .font(.system(size: 11))
             }
             .buttonStyle(.plain)
@@ -613,7 +621,7 @@ private struct FooterBar: View {
             Button {
                 NSApplication.shared.terminate(nil)
             } label: {
-                Label("Quit", systemImage: "power")
+                Label("Çıkış", systemImage: "power")
                     .font(.system(size: 11))
             }
             .buttonStyle(.plain)
@@ -636,7 +644,7 @@ private struct SettingsSection: View {
                 Toggle("CPU", isOn: $settings.showCPU)
                 Toggle("RAM", isOn: $settings.showRAM)
                 Toggle("Disk", isOn: $settings.showDisk)
-                Toggle("Net", isOn: $settings.showNetwork)
+                Toggle("Ağ", isOn: $settings.showNetwork)
             }
             .toggleStyle(.checkbox)
             .font(.system(size: 11))
@@ -667,9 +675,9 @@ private struct SettingsSection: View {
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
                 Picker("", selection: $settings.refreshInterval) {
-                    Text("1s").tag(1.0)
-                    Text("2s").tag(2.0)
-                    Text("5s").tag(5.0)
+                    Text("1 sn").tag(1.0)
+                    Text("2 sn").tag(2.0)
+                    Text("5 sn").tag(5.0)
                 }
                 .pickerStyle(.segmented)
                 .frame(width: 140)

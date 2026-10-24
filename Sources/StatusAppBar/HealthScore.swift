@@ -50,9 +50,9 @@ nonisolated enum HealthScore {
     /// Skor rengini kategorize eder (gösterge noktası için).
     static func color(for score: Int) -> (label: String, isGood: Bool) {
         switch score {
-        case 75...100: return ("Healthy", true)
-        case 50..<75:  return ("Fair", true)
-        default:       return ("Strained", false)
+        case 75...100: return (String(localized: "Sağlıklı"), true)
+        case 50..<75:  return (String(localized: "Orta"), true)
+        default:       return (String(localized: "Zorlanıyor"), false)
         }
     }
 }
