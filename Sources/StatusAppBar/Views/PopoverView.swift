@@ -78,20 +78,23 @@ struct PopoverContent: View {
                 NetworkSection()
             }
 
-            HStack(alignment: .top, spacing: 8) {
-                GPUSection()
-                // Isınma nedeni uyarı beklenmeden sürekli görünür — kullanıcı
-                // "neden ısınıyor" sorusunun cevabını burada görür.
-                ThermalSection()
-            }
+            if !SnapshotRenderer.storefront {
+                HStack(alignment: .top, spacing: 8) {
+                    GPUSection()
+                    // Isınma nedeni uyarı beklenmeden sürekli görünür — kullanıcı
+                    // "neden ısınıyor" sorusunun cevabını burada görür.
+                    ThermalSection()
+                }
 
-            SensorSection()
+                SensorSection()
+            }
 
             TopProcessesSection()
 
-            SpikeLogSection()
-
-            HealthHistorySection()
+            if !SnapshotRenderer.storefront {
+                SpikeLogSection()
+                HealthHistorySection()
+            }
 
             #if MAS
             // Derin analiz yalnızca ücretli App Store sürümünde (BuildVariant).
@@ -605,16 +608,22 @@ private struct FooterBar: View {
             .buttonStyle(.plain)
             .foregroundStyle(.secondary)
 
-            Menu {
-                Button("CSV") { Exporter.export(metrics: metrics, format: .csv) }
-                Button("JSON") { Exporter.export(metrics: metrics, format: .json) }
-            } label: {
+            if SnapshotRenderer.exporting {
                 Label(String(localized: "Dışa Aktar"), systemImage: "square.and.arrow.up")
                     .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+            } else {
+                Menu {
+                    Button("CSV") { Exporter.export(metrics: metrics, format: .csv) }
+                    Button("JSON") { Exporter.export(metrics: metrics, format: .json) }
+                } label: {
+                    Label(String(localized: "Dışa Aktar"), systemImage: "square.and.arrow.up")
+                        .font(.system(size: 11))
+                }
+                .menuStyle(.borderlessButton)
+                .frame(width: 90)
+                .foregroundStyle(.secondary)
             }
-            .menuStyle(.borderlessButton)
-            .frame(width: 90)
-            .foregroundStyle(.secondary)
 
             Spacer()
 

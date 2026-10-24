@@ -67,9 +67,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 /// README görsellerini mock veriyle render eder. Gerçek makineden hiçbir
 /// veri (IP, donanım, disk adı vb.) kullanmaz.
 enum SnapshotRenderer {
+    /// `ImageRenderer` bir `Menu` çizemez; sarı yasak simgesi basar.
+    /// Yalnızca `--make-docs` bunu açar. Çalışan uygulamada CSV/JSON menüsü durur.
+    static var exporting = false
+
+    /// Mağaza karesi 2560×1600 çerçeveye sığsın diye alttaki uzun bölümleri atlar.
+    /// Canlı panelde GPU, sensör, ani yükseliş ve sağlık geçmişi durur.
+    static var storefront = false
+
     @MainActor
     static func makeDocs(dir: String) {
         NSApp.appearance = NSAppearance(named: .darkAqua)
+        exporting = true
+        defer { exporting = false; storefront = false }
 
         let settings = AppSettings()
         let saved = (settings.showCPU, settings.showRAM, settings.showDisk,
@@ -80,18 +90,18 @@ enum SnapshotRenderer {
         settings.showNetwork = true
         settings.showIcons = true
         settings.menuBarMode = .full
+        #if MAS
+        // Kullanıcının anahtarını diske yazmadan "Gemini ayarlanmamış" hâlini göster.
+        settings.snapshotUnconfigured = true
+        #endif
 
-        writePNG(
-            ZStack {
-                Color(nsColor: .windowBackgroundColor)
-                PopoverContent()
-                    .environment(MetricsManager.mock(cpuTotal: 0.34))
-                    .environment(settings)
-            }
-            .fixedSize()
-            .environment(\.colorScheme, .dark),
-            to: dir + "/popover.png"
-        )
+        writePNG(popoverImage(settings), to: dir + "/popover.png")
+
+        if CommandLine.arguments.contains("--storefront") {
+            storefront = true
+            writePNG(popoverImage(settings), to: dir + "/storefront.png")
+            storefront = false
+        }
 
         writePNG(barStrip(MetricsManager.mock(cpuTotal: 0.20), settings),
                  to: dir + "/menubar.png")
@@ -101,6 +111,18 @@ enum SnapshotRenderer {
 
         (settings.showCPU, settings.showRAM, settings.showDisk,
          settings.showNetwork, settings.showIcons, settings.menuBarMode) = saved
+    }
+
+    @MainActor
+    private static func popoverImage(_ settings: AppSettings) -> some View {
+        ZStack {
+            Color(nsColor: .windowBackgroundColor)
+            PopoverContent()
+                .environment(MetricsManager.mock(cpuTotal: 0.34))
+                .environment(settings)
+        }
+        .fixedSize()
+        .environment(\.colorScheme, .dark)
     }
 
     @MainActor

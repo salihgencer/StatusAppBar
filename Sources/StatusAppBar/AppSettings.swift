@@ -87,11 +87,19 @@ final class AppSettings {
     var lmstudioURL: String { didSet { save(lmstudioURL, "lmstudioURL") } }
     var lmstudioModel: String { didSet { save(lmstudioModel, "lmstudioModel") } }
 
-    var aiProvider: AIProvider { AIProvider(rawValue: aiProviderRaw) ?? .gemini }
+    /// `--make-docs` mağaza karesi. Anahtarı UserDefaults'a yazmadan
+    /// "ayarlanmamış" cümlesini gösterir.
+    var snapshotUnconfigured = false
+
+    var aiProvider: AIProvider {
+        if snapshotUnconfigured { return .gemini }
+        return AIProvider(rawValue: aiProviderRaw) ?? .gemini
+    }
 
     /// Seçili sağlayıcı sohbet başlatmaya hazır mı (buton enable + ipucu
     /// metinleri bunu kullanır).
     var aiConfigured: Bool {
+        if snapshotUnconfigured { return false }
         switch aiProvider {
         case .gemini:    return !geminiAPIKey.isEmpty
         case .anthropic: return !anthropicAPIKey.isEmpty && !anthropicModel.isEmpty

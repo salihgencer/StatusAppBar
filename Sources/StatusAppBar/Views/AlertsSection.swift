@@ -100,22 +100,33 @@ struct DeepAnalysisSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
-                Button {
-                    openChat()
-                } label: {
-                    Label(advisor.hasConversation
-                          ? String(localized: "Sohbeti aç")
-                          : String(localized: "Derin analiz"),
-                          systemImage: "sparkles")
-                        .font(.system(size: 11))
-                }
-                .disabled(!settings.aiConfigured)
+                // ImageRenderer bordered Button çizemez (sarı yasak simgesi).
+                // --make-docs etiket basar; çalışan uygulamada düğme durur.
+                if SnapshotRenderer.exporting {
+                    snapshotChip(advisor.hasConversation
+                                 ? String(localized: "Sohbeti aç")
+                                 : String(localized: "Derin analiz"),
+                                 systemImage: "sparkles",
+                                 dimmed: !settings.aiConfigured)
+                    snapshotChip(String(localized: "Raporu kopyala"), systemImage: "doc.on.doc")
+                } else {
+                    Button {
+                        openChat()
+                    } label: {
+                        Label(advisor.hasConversation
+                              ? String(localized: "Sohbeti aç")
+                              : String(localized: "Derin analiz"),
+                              systemImage: "sparkles")
+                            .font(.system(size: 11))
+                    }
+                    .disabled(!settings.aiConfigured)
 
-                Button {
-                    advisor.copyReport(snapshot: metrics.snapshot(), alerts: metrics.alerts)
-                } label: {
-                    Label("Raporu kopyala", systemImage: "doc.on.doc")
-                        .font(.system(size: 11))
+                    Button {
+                        advisor.copyReport(snapshot: metrics.snapshot(), alerts: metrics.alerts)
+                    } label: {
+                        Label("Raporu kopyala", systemImage: "doc.on.doc")
+                            .font(.system(size: 11))
+                    }
                 }
 
                 Spacer()
@@ -136,12 +147,16 @@ struct DeepAnalysisSection: View {
 
                 // Anahtarsız tam tur: sağlayıcıyı demo'ya çekip sohbeti açar.
                 // App Review'ın 2.1(a) "demonstration mode" isteğinin girişi.
-                Button {
-                    settings.aiProviderRaw = AIProvider.demo.rawValue
-                    openChat()
-                } label: {
-                    Label("Demo dene", systemImage: "sparkles")
-                        .font(.system(size: 11))
+                if SnapshotRenderer.exporting {
+                    snapshotChip(String(localized: "Demo dene"), systemImage: "sparkles")
+                } else {
+                    Button {
+                        settings.aiProviderRaw = AIProvider.demo.rawValue
+                        openChat()
+                    } label: {
+                        Label("Demo dene", systemImage: "sparkles")
+                            .font(.system(size: 11))
+                    }
                 }
             }
 
@@ -170,6 +185,17 @@ struct DeepAnalysisSection: View {
     /// `NSApp.activate` şart: uygulama `LSUIElement` (accessory) olduğu için
     /// pencere açmak onu öne getirmez — arkada açılır ve kullanıcı hiçbir şey
     /// olmadı sanır.
+    /// `title` çağrı yerinde `String(localized:)` ile çevrilmiş olmalı.
+    /// ImageRenderer bordered `Button` çizemediği için düz kapsül basılır.
+    private func snapshotChip(_ title: String, systemImage: String, dimmed: Bool = false) -> some View {
+        Label(title, systemImage: systemImage)
+            .font(.system(size: 11))
+            .foregroundStyle(dimmed ? AnyShapeStyle(.tertiary) : AnyShapeStyle(.secondary))
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
+            .background(Color.primary.opacity(0.06), in: Capsule())
+    }
+
     private func openChat() {
         advisor.start(snapshot: metrics.snapshot(), alerts: metrics.alerts)
         openWindow(id: StatusAppBarApp.deepAnalysisWindowID)
